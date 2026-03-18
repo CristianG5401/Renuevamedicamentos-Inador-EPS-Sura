@@ -44,7 +44,9 @@ export class WhatsAppWebJsAdapter implements WhatsAppPort {
   }
 
   async sendMessage(chatId: string, message: string): Promise<string> {
-    const sentMessage = await this.client.sendMessage(chatId, message);
+    const sentMessage = await this.client.sendMessage(chatId, message, {
+      waitUntilMsgSent: true,
+    });
 
     if (!sentMessage?.id?.id) {
       throw new Error("No se pudo enviar el mensaje", { cause: sentMessage });
