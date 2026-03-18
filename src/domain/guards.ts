@@ -6,7 +6,10 @@ import type { MessageFromEps, RenewMedsContext } from "./types";
  * para determinar si coincide con el paso esperado del flujo.
  */
 export const guards = {
-  checkTermAndConditionsMenu: (_: { context: RenewMedsContext }, { msg }: { msg: MessageFromEps }) => {
+  checkTermAndConditionsMenu: (
+    _: { context: RenewMedsContext },
+    { msg }: { msg: MessageFromEps },
+  ) => {
     console.log("**🪼 checkTermAndConditionsMenu **", {
       msg,
     });
@@ -74,7 +77,10 @@ export const guards = {
     if (msg.type !== "chat") return false;
     return msg?.normalizedText?.includes(expectedText);
   },
-  checkEpsServicesList: (_: { context: RenewMedsContext }, { msg }: { msg: MessageFromEps }) => {
+  checkEpsServicesList: (
+    _: { context: RenewMedsContext },
+    { msg }: { msg: MessageFromEps },
+  ) => {
     console.log("**🪼 checkEpsServicesList **", {
       msg,
     });
@@ -95,7 +101,10 @@ export const guards = {
       !!matchingEpsServiceOption
     );
   },
-  checkProcsAndMedsMenu: (_: { context: RenewMedsContext }, { msg }: { msg: MessageFromEps }) => {
+  checkProcsAndMedsMenu: (
+    _: { context: RenewMedsContext },
+    { msg }: { msg: MessageFromEps },
+  ) => {
     console.log("**🪼 checkProcsAndMedsMenu **", {
       msg,
     });

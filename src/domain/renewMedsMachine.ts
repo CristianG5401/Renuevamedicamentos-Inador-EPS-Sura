@@ -1,4 +1,3 @@
-import type WAWebJS from "whatsapp-web.js";
 import { assign, fromPromise, setup } from "xstate";
 
 import { EVENTS, PROCEDURE_OPTIONS, STATES } from "./constants";
@@ -12,7 +11,7 @@ export const renewMedsMachine = setup({
     // Declaramos la "firma" del servicio, pero le ponemos un error por defecto
     // para que explote si olvidamos inyectarlo en producción.
     sendMessageService: fromPromise<
-      WAWebJS.MessageId,
+      string,
       { message: string; chatId?: string }
     >(async () => {
       throw new Error(
@@ -197,7 +196,8 @@ export const renewMedsMachine = setup({
               type: "checkChatMessage",
               params: ({ event }) => ({
                 msg: event.msg,
-                expectedText: "escribe el número de documento de identificación sin puntos, comas o cualquier otro carácter",
+                expectedText:
+                  "escribe el número de documento de identificación sin puntos, comas o cualquier otro carácter",
               }),
             },
             actions: assign({
@@ -409,7 +409,8 @@ export const renewMedsMachine = setup({
               type: "checkChatMessage",
               params: ({ event }) => ({
                 msg: event.msg,
-                expectedText: "si tienes una fórmula vigente para varios meses y ya te correponde la fecha de entrega", // El typo 'correponde' es un error tipográfico que envia la eps
+                expectedText:
+                  "si tienes una fórmula vigente para varios meses y ya te correponde la fecha de entrega", // El typo 'correponde' es un error tipográfico que envia la eps
               }),
             },
           },
@@ -488,7 +489,8 @@ export const renewMedsMachine = setup({
               type: "checkChatMessage",
               params: ({ event }) => ({
                 msg: event.msg,
-                expectedText: "hemos recibido la solicitud para renovar la fórmula de tus medicamentos.",
+                expectedText:
+                  "hemos recibido la solicitud para renovar la fórmula de tus medicamentos.",
               }),
             },
           },
@@ -525,7 +527,8 @@ export const renewMedsMachine = setup({
               type: "checkChatMessage",
               params: ({ event }) => ({
                 msg: event.msg,
-                expectedText: "identificamos que aún no es la fecha de renovación de tus medicamentos",
+                expectedText:
+                  "identificamos que aún no es la fecha de renovación de tus medicamentos",
               }),
             },
           },
