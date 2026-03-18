@@ -63,12 +63,21 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 ```txt
 eps-bot-prueba-1/
 ├── src/
-│   ├── index.ts               # Entry point principal (cliente WhatsApp + maquina de estados)
-│   ├── renewMedsMachine.ts    # Definicion de la maquina de estados (XState)
-│   ├── constants.ts           # Constantes de estados, eventos y opciones de procedimientos
-│   ├── guards.ts              # Guards (validaciones) para las transiciones de estado
-│   ├── types.ts               # Interfaces TypeScript (mensajes, contexto, input)
-│   └── config.ts              # Validacion de env vars + utilidades de masking
+│   ├── domain/                         # Logica de negocio pura (sin dependencias externas)
+│   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
+│   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado
+│   │   ├── constants.ts                # Constantes de estados, eventos y opciones de procedimientos
+│   │   └── types.ts                    # Interfaces TypeScript (contexto, input, opciones)
+│   ├── ports/                          # Contratos/interfaces (independientes de libreria)
+│   │   ├── whatsappPort.ts             # Interfaz WhatsAppPort + tipo IncomingMessage
+│   │   └── mappers/
+│   │       └── parseMessage.ts         # Convierte mensajes crudos de WS al formato del port
+│   ├── adapters/                       # Implementaciones concretas de los ports
+│   │   └── whatsappWebJs.ts            # Adapter de whatsapp-web.js que implementa WhatsAppPort
+│   ├── services/                       # Servicios de aplicacion (conectan dominio con adapters)
+│   │   └── actorServices.ts            # Factory de actores XState con inyeccion de WhatsAppPort
+│   ├── config.ts                       # Validacion de env vars + utilidades de masking
+│   └── index.ts                        # Entry point: crea adapter, inyecta deps, inicia actor
 ├── docs/
 │   ├── renewMedsMachine-playground.html   # Playground interactivo
 │   └── sample-data/                       # Datos de ejemplo de mensajes de la EPS
@@ -206,19 +215,19 @@ Cada guard valida que el mensaje recibido del bot coincida con el paso esperado 
 
 ### Inyeccion de dependencias
 
-La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. En `index.ts` se inyecta la implementacion real usando `machine.provide()`:
+La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. En `index.ts` se inyecta la implementacion real mediante el patron **Port/Adapter**:
 
 ```typescript
-const renewMedsMachineWithDeps = renewMedsMachine.provide({
-  actors: {
-    sendMessageService: fromPromise(async ({ input }) => {
-      return await client.sendMessage(ENV.EPS_CHAT_ID, input.message);
-    }),
-  },
-});
+// 1. Se crea el adapter concreto (la unica referencia a whatsapp-web.js)
+const whatsapp = new WhatsAppWebJsAdapter();
+
+// 2. Se inyecta a traves de la factory, que solo conoce la interfaz WhatsAppPort
+const renewMedsMachineWithDeps = renewMedsMachine.provide(
+  createActorServices(whatsapp),
+);
 ```
 
-Esto permite testear la maquina sin un cliente de WhatsApp real.
+La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio y los servicios no se modifican.
 
 ## Playground interactivo
 
