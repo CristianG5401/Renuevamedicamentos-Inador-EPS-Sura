@@ -1,0 +1,57 @@
+[
+  {
+    "$$unknownFieldCount": 0,
+    "rows": [
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Cédula de ciudadanía",
+        "rowId": "648396563e475205ea80c904"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Cédula de extranjería",
+        "rowId": "6483965e3e475205ea80c905"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Tarjeta de identidad",
+        "rowId": "6483966c3e475205ea80c906"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "NIT",
+        "rowId": "648396743e475205ea80c908"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Pasaporte",
+        "rowId": "6483967e3e475205ea80c909"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Pasaporte diplomático",
+        "rowId": "6483968e3e475205ea80c90a"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Registro civil",
+        "rowId": "648396a43e475205ea80c90b"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Tarjeta de Extranjería",
+        "rowId": "648396b33e475205ea80c90d"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "NUIP",
+        "rowId": "648396c73e475205ea80c90e"
+      },
+      {
+        "$$unknownFieldCount": 0,
+        "title": "Otro",
+        "rowId": "6483971d767b9a4d560ed21c"
+      }
+    ]
+  }
+]

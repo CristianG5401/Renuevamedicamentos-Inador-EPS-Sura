@@ -1,0 +1,20 @@
+[
+  {
+    "$$unknownFieldCount": 0,
+    "buttonId": "6737bc59a08c6f7a684132b6",
+    "buttonText": {
+      "$$unknownFieldCount": 0,
+      "displayText": "Trámites"
+    },
+    "type": 1
+  },
+  {
+    "$$unknownFieldCount": 0,
+    "buttonId": "6737bc5daf5e6f2b6679c2ef",
+    "buttonText": {
+      "$$unknownFieldCount": 0,
+      "displayText": "Medicamentos"
+    },
+    "type": 1
+  }
+]

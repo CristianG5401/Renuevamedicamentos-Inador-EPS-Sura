@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>renewMedsMachine — Interactive Playground</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: system-ui, -apple-system, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    padding: 12px 24px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  header h1 { font-size: 18px; font-weight: 600; color: #f1f5f9; font-family: 'SF Mono', 'Fira Code', monospace; }
+  header p { font-size: 13px; color: #64748b; }
+
+  .layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 340px;
+    border-right: 1px solid #1e293b;
+    overflow-y: auto;
+    padding: 16px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .section {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-weight: 500;
+    transition: opacity 0.15s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover:not(:disabled) { opacity: 0.85; }
+  .btn:active:not(:disabled) { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .btn-blue { background: #2563eb; color: #fff; }
+  .btn-green { background: #059669; color: #fff; }
+  .btn-red { background: #dc2626; color: #fff; }
+  .btn-amber { background: #d97706; color: #1e293b; }
+  .btn-gray { background: #334155; color: #94a3b8; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+  .btn-cyan { background: #0891b2; color: #fff; }
+  .btn-pink { background: #db2777; color: #fff; }
+
+  .btn-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .btn-group:last-child { margin-bottom: 0; }
+
+  .control-label {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .separator { height: 1px; background: #334155; margin: 10px 0; }
+
+  /* ── Toggle ── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .toggle-row:last-child { margin-bottom: 0; }
+  .toggle-row span { color: #94a3b8; }
+  .toggle {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #dc2626;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s;
+  }
+  .toggle input:checked + .toggle-slider { background: #059669; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+  .toggle-value {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 32px;
+  }
+  .toggle-value.pass { color: #10b981; }
+  .toggle-value.fail { color: #ef4444; }
+
+  /* ── Radio Group ── */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .radio-label input[type="radio"] { accent-color: #3b82f6; }
+
+  /* ── State Details ── */
+  #stateDetails {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #94a3b8;
+  }
+  .detail-name {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+  .detail-type {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .detail-type.t-initial { background: #1e3a5f; color: #93c5fd; }
+  .detail-type.t-invoke { background: #2d1b4e; color: #c4b5fd; }
+  .detail-type.t-waiting { background: #3d2e0a; color: #fcd34d; }
+  .detail-type.t-final { background: #1a3a2a; color: #6ee7b7; }
+
+  .detail-desc { color: #cbd5e1; margin-bottom: 10px; font-size: 12px; }
+  .detail-section { margin-bottom: 8px; }
+  .detail-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .detail-section code {
+    display: block;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: #e2e8f0;
+    background: #0f172a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    word-break: break-all;
+  }
+  .detail-transition {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    padding: 3px 0;
+    color: #cbd5e1;
+  }
+  .detail-transition .arrow { color: #64748b; margin-right: 4px; }
+  .detail-event {
+    font-size: 10px;
+    color: #64748b;
+    margin-left: 8px;
+  }
+
+  /* ── Transition Log ── */
+  .log-container {
+    max-height: 140px;
+    overflow-y: auto;
+    font-size: 12px;
+  }
+  .log-entry {
+    padding: 4px 0;
+    border-bottom: 1px solid #0f172a;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .log-empty { color: #475569; font-style: italic; font-family: system-ui; }
+  .log-index { color: #475569; font-size: 10px; min-width: 18px; }
+  .log-from { color: #94a3b8; font-size: 10px; }
+  .log-arrow { color: #475569; }
+  .log-to { color: #e2e8f0; font-size: 10px; }
+  .log-event { font-size: 10px; color: #64748b; width: 100%; padding-left: 22px; }
+
+  /* ── Canvas ── */
+  .canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+  }
+  .canvas-inner {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12px;
+  }
+  #diagram {
+    flex-shrink: 0;
+  }
+  .zoom-controls {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+  }
+  .zoom-btn {
+    width: 32px;
+    height: 32px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .zoom-btn:hover { background: #334155; }
+
+  /* ── Phase labels ── */
+  .phase-label {
+    font-family: system-ui;
+    font-size: 11px;
+    fill: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── SVG styling ── */
+  .node { cursor: pointer; }
+  .node rect {
+    stroke-width: 2;
+    transition: stroke-width 0.2s, filter 0.3s;
+  }
+  .node:hover rect { stroke-width: 2.5; }
+  .node-active rect { stroke-width: 3; }
+  .node-active.type-initial { filter: drop-shadow(0 0 10px rgba(59,130,246,0.5)); }
+  .node-active.type-invoke { filter: drop-shadow(0 0 10px rgba(139,92,246,0.5)); }
+  .node-active.type-waiting { filter: drop-shadow(0 0 10px rgba(245,158,11,0.5)); }
+  .node-active.type-final { filter: drop-shadow(0 0 10px rgba(16,185,129,0.5)); }
+
+  .node-selected rect { stroke-width: 3; stroke-dasharray: 6 3; }
+
+  .conn-path { transition: stroke-width 0.3s, opacity 0.3s; }
+  .conn-path.active { stroke-width: 3 !important; }
+  .conn-label {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 9px;
+  }
+  .conn-label-bg { fill: #0f172a; rx: 3; ry: 3; }
+
+  .legend-text {
+    font-family: system-ui;
+    font-size: 10px;
+    fill: #64748b;
+  }
+
+  /* ── Prompt Output ── */
+  .prompt-section {
+    border-top: 1px solid #1e293b;
+    padding: 12px 24px;
+    flex-shrink: 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  #promptOutput {
+    flex: 1;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #cbd5e1;
+    line-height: 1.5;
+    background: #1e293b;
+    padding: 10px 14px;
+    border-radius: 6px;
+    max-height: 110px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .copy-btn {
+    padding: 8px 16px;
+    background: #334155;
+    color: #e2e8f0;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: #475569; }
+  .copy-btn.copied { background: #059669; border-color: #059669; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>renewMedsMachine</h1>
+  <p>Interactive state machine playground — EPS Sura WhatsApp Bot (complete flow)</p>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <!-- Presets -->
+    <div class="section">
+      <div class="section-title">Presets</div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-green" onclick="runPreset('happy')">Happy Path</button>
+        <button type="button" class="btn btn-cyan" onclick="runPreset('alt-welcome')">Alt Welcome</button>
+        <button type="button" class="btn btn-pink" onclick="runPreset('nothing-to-renew')">Nothing to Renew</button>
+        <button type="button" class="btn btn-red" onclick="runPreset('wake-fail')">Wake Failure</button>
+        <button type="button" class="btn btn-amber" onclick="runPreset('wrong-menu')">Wrong Menu</button>
+        <button type="button" class="btn btn-purple" onclick="runPreset('id-type-fail')">ID Type Fail</button>
+      </div>
+    </div>
+
+    <!-- Simulation Controls -->
+    <div class="section">
+      <div class="section-title">Simulation</div>
+
+      <div class="control-label">Events</div>
+      <div class="btn-group">
+        <button type="button" id="btnWs" class="btn btn-blue" onclick="sendEvent('WS_CLIENT_READY')">WS_CLIENT_READY</button>
+        <button type="button" id="btnMsg" class="btn btn-blue" onclick="sendEvent('MESSAGE_RECEIVED')">MESSAGE_RECEIVED</button>
+      </div>
+
+      <div class="control-label">Invoke Result</div>
+      <div class="btn-group">
+        <button type="button" id="btnResolve" class="btn btn-green" onclick="sendEvent('INVOKE_DONE')">Resolve</button>
+        <button type="button" id="btnReject" class="btn btn-red" onclick="sendEvent('INVOKE_ERROR')">Reject</button>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="control-label">Menu Guard</div>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="menuGuard" value="tc" checked onchange="setMenuGuard('tc')">
+          <span>T&C Menu (pass)</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="menuGuard" value="alt" onchange="setMenuGuard('alt')">
+          <span>Alt Welcome (skip T&C)</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="menuGuard" value="neither" onchange="setMenuGuard('neither')">
+          <span>Neither (fail)</span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>ID Type Guard:</span>
+        <label class="toggle">
+          <input type="checkbox" id="idTypeToggle" checked onchange="toggleGuard('idType')">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="idTypeLabel" class="toggle-value pass">PASS</span>
+      </div>
+      <div class="toggle-row">
+        <span>EPS Services Guard:</span>
+        <label class="toggle">
+          <input type="checkbox" id="epsServicesToggle" checked onchange="toggleGuard('epsServices')">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="epsServicesLabel" class="toggle-value pass">PASS</span>
+      </div>
+      <div class="toggle-row">
+        <span>Procs & Meds Guard:</span>
+        <label class="toggle">
+          <input type="checkbox" id="procsAndMedsToggle" checked onchange="toggleGuard('procsAndMeds')">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="procsAndMedsLabel" class="toggle-value pass">PASS</span>
+      </div>
+      <div class="toggle-row">
+        <span>Chat Message Guard:</span>
+        <label class="toggle">
+          <input type="checkbox" id="chatMessageToggle" checked onchange="toggleGuard('chatMessage')">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="chatMessageLabel" class="toggle-value pass">PASS</span>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="control-label">Renewal Result</div>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="renewalResult" value="success" checked onchange="setRenewalResult('success')">
+          <span>Renewal Success</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="renewalResult" value="nothing" onchange="setRenewalResult('nothing')">
+          <span>Nothing to Renew</span>
+        </label>
+      </div>
+
+      <div class="separator"></div>
+      <button type="button" class="btn btn-gray" onclick="resetSimulation()" style="width:100%;justify-content:center;">Reset</button>
+    </div>
+
+    <!-- State Details -->
+    <div class="section">
+      <div class="section-title">State Details</div>
+      <div id="stateDetails"><span class="log-empty">Click a state node for details</span></div>
+    </div>
+
+    <!-- Transition Log -->
+    <div class="section">
+      <div class="section-title">Transition Log</div>
+      <div id="transitionLog" class="log-container">
+        <div class="log-entry log-empty">No transitions yet</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="canvas">
+    <div class="zoom-controls">
+      <button type="button" class="zoom-btn" onclick="zoom(1)">+</button>
+      <button type="button" class="zoom-btn" onclick="zoom(-1)">&minus;</button>
+      <button type="button" class="zoom-btn" onclick="zoom(0)" style="font-size:12px;">R</button>
+    </div>
+    <div class="canvas-inner" id="canvasInner">
+      <svg id="diagram" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="renewMedsMachine state diagram"></svg>
+    </div>
+  </main>
+</div>
+
+<div class="prompt-section">
+  <pre id="promptOutput"></pre>
+  <button type="button" class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 1. DATA — All 22 states
+// ═══════════════════════════════════════════════════
+
+// Layout: two-column zigzag, grouped by phase
+// Left column (WAITING states): cx ~ 240
+// Right column (SENDING states): cx ~ 620
+// COMPLETED: far right cx ~ 820
+
+const NW = 280; // node width for WAITING
+const NS = 240; // node width for SENDING
+const NH = 44;  // node height
+const NHT = 54; // tall node height (2-line labels)
+
+const CANVAS_W = 960;
+const CANVAS_H = 1420;
+
+const NODES = {
+  // ── Phase 1: Start ──
+  IDLE: {
+    cx: 240, cy: 50, w: 150, h: NH,
+    type: 'initial', label: 'IDLE',
+    fill: '#1e3a5f', stroke: '#3b82f6', textColor: '#93c5fd',
+  },
+  WAKING_UP_EPS_BOT: {
+    cx: 240, cy: 130, w: 260, h: NH,
+    type: 'invoke', label: 'WAKING_UP_EPS_BOT',
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Phase 2: T&C ──
+  WAITING_FOR_MAIN_MENU: {
+    cx: 240, cy: 230, w: NW, h: NH,
+    type: 'waiting', label: 'WAITING_FOR_MAIN_MENU',
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_ACCEPT_TERMS_AND_CONDITIONS: {
+    cx: 240, cy: 320, w: 320, h: NHT,
+    type: 'invoke', label: ['SENDING_ACCEPT_', 'TERMS_AND_CONDITIONS'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Phase 3: Identification ──
+  WAITING_FOR_ID_TYPE_LIST: {
+    cx: 240, cy: 420, w: NW, h: NH,
+    type: 'waiting', label: 'WAITING_FOR_ID_TYPE_LIST',
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_ID_TYPE: {
+    cx: 620, cy: 420, w: NS, h: NH,
+    type: 'invoke', label: 'SENDING_ID_TYPE',
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+  WAITING_FOR_ID_NUMBER_INPUT_MESSAGE: {
+    cx: 240, cy: 500, w: 320, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_ID_NUMBER', '_INPUT_MESSAGE'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_ID_NUMBER: {
+    cx: 620, cy: 500, w: NS, h: NH,
+    type: 'invoke', label: 'SENDING_ID_NUMBER',
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Phase 4: Services ──
+  WAITING_FOR_EPS_SERVICES_LIST: {
+    cx: 240, cy: 590, w: 310, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_EPS', '_SERVICES_LIST'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_SELECTED_EPS_SERVICE: {
+    cx: 620, cy: 590, w: 280, h: NHT,
+    type: 'invoke', label: ['SENDING_SELECTED', '_EPS_SERVICE'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+  WAITING_FOR_PROCS_AND_MEDS_MENU: {
+    cx: 240, cy: 680, w: 320, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_PROCS', '_AND_MEDS_MENU'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_SELECTED_PROCS_AND_MEDS_OPTION: {
+    cx: 620, cy: 680, w: 310, h: NHT,
+    type: 'invoke', label: ['SENDING_SELECTED_PROCS', '_AND_MEDS_OPTION'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Phase 5: Procedures ──
+  WAITING_FOR_PROCEDURES_MESSAGE: {
+    cx: 240, cy: 770, w: 310, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_PROCEDURES', '_MESSAGE'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_SELECTED_PROCEDURE_OPTION: {
+    cx: 620, cy: 770, w: 300, h: NHT,
+    type: 'invoke', label: ['SENDING_SELECTED', '_PROCEDURE_OPTION'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+  WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING: {
+    cx: 240, cy: 860, w: 340, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_ACTIVE', '_PRESCRIPTION_WARNING'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  WAITING_FOR_BIRTHDATE_INPUT_MESSAGE: {
+    cx: 240, cy: 940, w: 320, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_BIRTHDATE', '_INPUT_MESSAGE'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_BIRTHDATE: {
+    cx: 620, cy: 940, w: NS, h: NH,
+    type: 'invoke', label: 'SENDING_BIRTHDATE',
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Phase 6: Result ──
+  WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL: {
+    cx: 300, cy: 1030, w: 370, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_CONFIRMATION', '_OF_PRESCRIPTION_RENEWAL'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS: {
+    cx: 300, cy: 1110, w: 360, h: NHT,
+    type: 'waiting', label: ['WAITING_FOR_PRESCRIPTION', '_RENEWAL_SUCCESS'],
+    fill: '#3d2e0a', stroke: '#f59e0b', textColor: '#fcd34d',
+  },
+  SENDING_SUCCESS_MESSAGE_ALERT: {
+    cx: 180, cy: 1200, w: 280, h: NHT,
+    type: 'invoke', label: ['SENDING_SUCCESS', '_MESSAGE_ALERT'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+  SENDING_NOTHING_TO_RENEW_MESSAGE: {
+    cx: 520, cy: 1200, w: 300, h: NHT,
+    type: 'invoke', label: ['SENDING_NOTHING', '_TO_RENEW_MESSAGE'],
+    fill: '#2d1b4e', stroke: '#8b5cf6', textColor: '#c4b5fd',
+  },
+
+  // ── Final ──
+  COMPLETED: {
+    cx: 350, cy: 1300, w: 170, h: 70,
+    type: 'final', label: 'COMPLETED',
+    fill: '#1a3a2a', stroke: '#10b981', textColor: '#6ee7b7',
+  },
+};
+
+// Connections: main flow + error paths to COMPLETED
+const CONNECTIONS = [
+  // Phase 1: Start
+  { id: 'idle-waking', from: 'IDLE', to: 'WAKING_UP_EPS_BOT',
+    fromSide: 'bottom', toSide: 'top', fromOff: 0, toOff: 0,
+    label: 'WS_CLIENT_READY', type: 'event' },
+  { id: 'waking-waiting', from: 'WAKING_UP_EPS_BOT', to: 'WAITING_FOR_MAIN_MENU',
+    fromSide: 'bottom', toSide: 'top', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+
+  // Phase 2: T&C
+  { id: 'mainmenu-sendtc', from: 'WAITING_FOR_MAIN_MENU', to: 'SENDING_ACCEPT_TERMS_AND_CONDITIONS',
+    fromSide: 'bottom', toSide: 'top', fromOff: -30, toOff: 0,
+    label: 'guard: T&C', type: 'guard-pass' },
+  { id: 'mainmenu-skip-tc', from: 'WAITING_FOR_MAIN_MENU', to: 'WAITING_FOR_ID_TYPE_LIST',
+    fromSide: 'left', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: alt', type: 'guard-alt' },
+  { id: 'sendtc-idtype', from: 'SENDING_ACCEPT_TERMS_AND_CONDITIONS', to: 'WAITING_FOR_ID_TYPE_LIST',
+    fromSide: 'bottom', toSide: 'top', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+
+  // Phase 3: Identification
+  { id: 'idtype-list-send', from: 'WAITING_FOR_ID_TYPE_LIST', to: 'SENDING_ID_TYPE',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+  { id: 'send-idtype-waitnum', from: 'SENDING_ID_TYPE', to: 'WAITING_FOR_ID_NUMBER_INPUT_MESSAGE',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waitnum-sendnum', from: 'WAITING_FOR_ID_NUMBER_INPUT_MESSAGE', to: 'SENDING_ID_NUMBER',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+
+  // Phase 4: Services
+  { id: 'sendnum-waiteps', from: 'SENDING_ID_NUMBER', to: 'WAITING_FOR_EPS_SERVICES_LIST',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waiteps-sendeps', from: 'WAITING_FOR_EPS_SERVICES_LIST', to: 'SENDING_SELECTED_EPS_SERVICE',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+  { id: 'sendeps-waitprocs', from: 'SENDING_SELECTED_EPS_SERVICE', to: 'WAITING_FOR_PROCS_AND_MEDS_MENU',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waitprocs-sendprocs', from: 'WAITING_FOR_PROCS_AND_MEDS_MENU', to: 'SENDING_SELECTED_PROCS_AND_MEDS_OPTION',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+
+  // Phase 5: Procedures
+  { id: 'sendprocs-waitprocmsg', from: 'SENDING_SELECTED_PROCS_AND_MEDS_OPTION', to: 'WAITING_FOR_PROCEDURES_MESSAGE',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waitprocmsg-sendproc', from: 'WAITING_FOR_PROCEDURES_MESSAGE', to: 'SENDING_SELECTED_PROCEDURE_OPTION',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+  { id: 'sendproc-waitwarn', from: 'SENDING_SELECTED_PROCEDURE_OPTION', to: 'WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waitwarn-waitbirth', from: 'WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING', to: 'WAITING_FOR_BIRTHDATE_INPUT_MESSAGE',
+    fromSide: 'bottom', toSide: 'top', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+  { id: 'waitbirth-sendbirth', from: 'WAITING_FOR_BIRTHDATE_INPUT_MESSAGE', to: 'SENDING_BIRTHDATE',
+    fromSide: 'right', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+
+  // Phase 6: Result
+  { id: 'sendbirth-waitconfirm', from: 'SENDING_BIRTHDATE', to: 'WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'waitconfirm-waitresult', from: 'WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL', to: 'WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS',
+    fromSide: 'bottom', toSide: 'top', fromOff: 0, toOff: 0,
+    label: 'guard: pass', type: 'guard-pass' },
+  { id: 'waitresult-success', from: 'WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS', to: 'SENDING_SUCCESS_MESSAGE_ALERT',
+    fromSide: 'bottom', toSide: 'top', fromOff: -60, toOff: 0,
+    label: 'success', type: 'success' },
+  { id: 'waitresult-nothing', from: 'WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS', to: 'SENDING_NOTHING_TO_RENEW_MESSAGE',
+    fromSide: 'bottom', toSide: 'top', fromOff: 60, toOff: 0,
+    label: 'nothing', type: 'guard-fail' },
+
+  // Final
+  { id: 'success-completed', from: 'SENDING_SUCCESS_MESSAGE_ALERT', to: 'COMPLETED',
+    fromSide: 'bottom', toSide: 'left', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+  { id: 'nothing-completed', from: 'SENDING_NOTHING_TO_RENEW_MESSAGE', to: 'COMPLETED',
+    fromSide: 'bottom', toSide: 'right', fromOff: 0, toOff: 0,
+    label: 'onDone', type: 'success' },
+];
+
+const CONN_COLORS = {
+  event: '#3b82f6',
+  success: '#10b981',
+  error: '#ef4444',
+  'guard-pass': '#10b981',
+  'guard-fail': '#f59e0b',
+  'guard-alt': '#06b6d4',
+};
+
+const PHASE_LABELS = [
+  { text: 'START', x: 30, y: 55 },
+  { text: 'T&C', x: 30, y: 235 },
+  { text: 'IDENTIFICATION', x: 30, y: 425 },
+  { text: 'SERVICES', x: 30, y: 595 },
+  { text: 'PROCEDURES', x: 30, y: 775 },
+  { text: 'RESULT', x: 30, y: 1035 },
+];
+
+const STATE_INFO = {
+  IDLE: {
+    type: 'initial',
+    description: 'Machine is idle, waiting for the WhatsApp client to connect and emit the "ready" event.',
+    transitions: [
+      { event: 'WS_CLIENT_READY', target: 'WAKING_UP_EPS_BOT' },
+    ],
+  },
+  WAKING_UP_EPS_BOT: {
+    type: 'invoke',
+    description: 'Sends initial greeting to the EPS bot to start the medication renewal flow.',
+    invoke: { service: 'sendMessageService', id: 'wakeUpEpsBot', input: '"Hola, necesito pedir mis medicamentos"' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_MAIN_MENU' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_MAIN_MENU: {
+    type: 'waiting',
+    description: 'Waiting for the EPS bot to respond with the T&C menu or alternative welcome message.',
+    guard: {
+      name: 'checkTermAndConditionsMenu / checkAbsenceOfTermAndConditionsMenu',
+      description: 'Two guards: (1) checks welcome text + "Acepto" button. (2) checks alternative welcome with no buttons.',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: T&C]', target: 'SENDING_ACCEPT_T&C' },
+      { event: 'MESSAGE_RECEIVED [guard: alt]', target: 'WAITING_FOR_ID_TYPE_LIST' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_ACCEPT_TERMS_AND_CONDITIONS: {
+    type: 'invoke',
+    description: 'Sends "Acepto" to accept terms & conditions.',
+    invoke: { service: 'sendMessageService', id: 'acceptTermsAndConditions', input: 'context.messageFromEps.dynamicReplyButtons.displayTexts[0]' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_ID_TYPE_LIST' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_ID_TYPE_LIST: {
+    type: 'waiting',
+    description: 'Waiting for the ID type selection list (e.g., "C\u00E9dula de ciudadan\u00EDa").',
+    guard: {
+      name: 'checkIdTypeList',
+      description: 'Checks message type is "list", description matches, and configured idType exists in options.',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_ID_TYPE' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_ID_TYPE: {
+    type: 'invoke',
+    description: 'Sends the selected ID type to the EPS bot.',
+    invoke: { service: 'sendMessageService', id: 'sendIdType', input: 'context.idType' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_ID_NUMBER_INPUT_MESSAGE' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_ID_NUMBER_INPUT_MESSAGE: {
+    type: 'waiting',
+    description: 'Waiting for the prompt to enter the ID number.',
+    guard: {
+      name: 'checkChatMessage',
+      description: 'Checks message text contains "escribe el n\u00FAmero de documento de identificaci\u00F3n..."',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_ID_NUMBER' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_ID_NUMBER: {
+    type: 'invoke',
+    description: 'Sends the ID number.',
+    invoke: { service: 'sendMessageService', id: 'sendIdNumber', input: 'context.idNumber' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_EPS_SERVICES_LIST' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_EPS_SERVICES_LIST: {
+    type: 'waiting',
+    description: 'Waiting for the list of EPS services.',
+    guard: {
+      name: 'checkEpsServicesList',
+      description: 'Checks list contains "Tr\u00E1mites y Medicamentos" option.',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_SELECTED_EPS_SERVICE' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_SELECTED_EPS_SERVICE: {
+    type: 'invoke',
+    description: 'Sends "Tr\u00E1mites y Medicamentos".',
+    invoke: { service: 'sendMessageService', id: 'sendSelectedEpsService', input: '"Tr\u00E1mites y Medicamentos"' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_PROCS_AND_MEDS_MENU' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_PROCS_AND_MEDS_MENU: {
+    type: 'waiting',
+    description: 'Waiting for the procedures & medications submenu.',
+    guard: {
+      name: 'checkProcsAndMedsMenu',
+      description: 'Checks dynamicReplyButtons contain "Tr\u00E1mites" option.',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_SELECTED_PROCS_AND_MEDS_OPTION' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_SELECTED_PROCS_AND_MEDS_OPTION: {
+    type: 'invoke',
+    description: 'Sends "Tr\u00E1mites".',
+    invoke: { service: 'sendMessageService', id: 'sendSelectedProcsAndMedsOption', input: '"Tr\u00E1mites"' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_PROCEDURES_MESSAGE' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_PROCEDURES_MESSAGE: {
+    type: 'waiting',
+    description: 'Waiting for the procedures menu.',
+    guard: {
+      name: 'checkChatMessage',
+      description: 'Checks message text contains "renovaci\u00F3n mensual formula de medicamentos".',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_SELECTED_PROCEDURE_OPTION' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_SELECTED_PROCEDURE_OPTION: {
+    type: 'invoke',
+    description: 'Sends "3" (prescription renewal option).',
+    invoke: { service: 'sendMessageService', id: 'sendSelectedProcedureOption', input: 'PROCEDURE_OPTIONS.RENEW_MEDS ("3")' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING: {
+    type: 'waiting',
+    description: 'Waiting for the warning about active prescriptions.',
+    guard: {
+      name: 'checkChatMessage',
+      description: 'Checks message text contains "si tienes una f\u00F3rmula vigente...".',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'WAITING_FOR_BIRTHDATE_INPUT_MESSAGE' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_BIRTHDATE_INPUT_MESSAGE: {
+    type: 'waiting',
+    description: 'Waiting for the prompt to enter the birthdate.',
+    guard: {
+      name: 'checkChatMessage',
+      description: 'Checks message text contains "\u00BFcu\u00E1l es tu fecha de nacimiento?".',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'SENDING_BIRTHDATE' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_BIRTHDATE: {
+    type: 'invoke',
+    description: 'Sends the birthdate.',
+    invoke: { service: 'sendMessageService', id: 'sendBirthdate', input: 'context.birthdate' },
+    transitions: [
+      { event: 'onDone', target: 'WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL: {
+    type: 'waiting',
+    description: 'Waiting for confirmation that the renewal request was received.',
+    guard: {
+      name: 'checkChatMessage',
+      description: 'Checks message text contains "hemos recibido la solicitud para renovar...".',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [guard: pass]', target: 'WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS' },
+      { event: 'MESSAGE_RECEIVED [guard: fail]', target: 'COMPLETED' },
+    ],
+  },
+  WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS: {
+    type: 'waiting',
+    description: 'Waiting for final result: renewal success or nothing to renew.',
+    guard: {
+      name: 'checkChatMessage (2 branches)',
+      description: 'Branch 1: "se renovaron exitosamente tus medicamentos." Branch 2: "identificamos que a\u00FAn no es la fecha de renovaci\u00F3n...".',
+    },
+    transitions: [
+      { event: 'MESSAGE_RECEIVED [success]', target: 'SENDING_SUCCESS_MESSAGE_ALERT' },
+      { event: 'MESSAGE_RECEIVED [nothing]', target: 'SENDING_NOTHING_TO_RENEW_MESSAGE' },
+      { event: 'MESSAGE_RECEIVED [fail]', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_SUCCESS_MESSAGE_ALERT: {
+    type: 'invoke',
+    description: 'Sends success alert to the configured user chat.',
+    invoke: { service: 'sendMessageService', id: 'sendSuccessAlert', input: 'context.successAlertMessage -> context.userToAlertChatId' },
+    transitions: [
+      { event: 'onDone', target: 'COMPLETED' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  SENDING_NOTHING_TO_RENEW_MESSAGE: {
+    type: 'invoke',
+    description: 'Sends "nothing to renew" alert to the configured user chat.',
+    invoke: { service: 'sendMessageService', id: 'sendNothingToRenew', input: 'context.nothingToRenewAlertMessage -> context.userToAlertChatId' },
+    transitions: [
+      { event: 'onDone', target: 'COMPLETED' },
+      { event: 'onError', target: 'COMPLETED' },
+    ],
+  },
+  COMPLETED: {
+    type: 'final',
+    description: 'Final state. Machine stops. The actor\'s complete() callback destroys the WhatsApp client and exits.',
+    transitions: [],
+  },
+};
+
+// Maps: which states are WAITING (accept MESSAGE_RECEIVED) and which are INVOKE (accept INVOKE_DONE/ERROR)
+const WAITING_STATES = new Set(Object.entries(STATE_INFO).filter(([,v]) => v.type === 'waiting').map(([k]) => k));
+const INVOKE_STATES = new Set(Object.entries(STATE_INFO).filter(([,v]) => v.type === 'invoke').map(([k]) => k));
+
+const PRESETS = {
+  'happy': {
+    name: 'Happy Path (T&C → Success)',
+    steps: [
+      'WS_CLIENT_READY', 'INVOKE_DONE', // IDLE → WAKING → WAITING_MAIN_MENU
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_T&C → WAITING_ID_TYPE
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_ID_TYPE → WAITING_ID_NUM
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_ID_NUM → WAITING_EPS_SERVICES
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_EPS_SVC → WAITING_PROCS_MEDS
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_PROCS_MEDS → WAITING_PROCEDURES
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_PROCEDURE → WAITING_PRESCRIPTION_WARN
+      'MESSAGE_RECEIVED',                // → WAITING_BIRTHDATE
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_BIRTHDATE → WAITING_CONFIRMATION
+      'MESSAGE_RECEIVED',                // → WAITING_RENEWAL_RESULT
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_SUCCESS → COMPLETED
+    ],
+    guards: { menuGuard: 'tc', idType: true, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'success' },
+  },
+  'alt-welcome': {
+    name: 'Alt Welcome (skip T&C → Success)',
+    steps: [
+      'WS_CLIENT_READY', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED',               // → skip T&C → WAITING_ID_TYPE
+      'MESSAGE_RECEIVED', 'INVOKE_DONE', // → SENDING_ID_TYPE → WAITING_ID_NUM
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+    ],
+    guards: { menuGuard: 'alt', idType: true, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'success' },
+  },
+  'nothing-to-renew': {
+    name: 'Nothing to Renew',
+    steps: [
+      'WS_CLIENT_READY', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+    ],
+    guards: { menuGuard: 'tc', idType: true, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'nothing' },
+  },
+  'wake-fail': {
+    name: 'Wake Failure',
+    steps: ['WS_CLIENT_READY', 'INVOKE_ERROR'],
+    guards: { menuGuard: 'tc', idType: true, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'success' },
+  },
+  'wrong-menu': {
+    name: 'Wrong Menu',
+    steps: ['WS_CLIENT_READY', 'INVOKE_DONE', 'MESSAGE_RECEIVED'],
+    guards: { menuGuard: 'neither', idType: true, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'success' },
+  },
+  'id-type-fail': {
+    name: 'ID Type Fail',
+    steps: [
+      'WS_CLIENT_READY', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED', 'INVOKE_DONE',
+      'MESSAGE_RECEIVED',
+    ],
+    guards: { menuGuard: 'tc', idType: false, epsServices: true, procsAndMeds: true, chatMessage: true, renewalResult: 'success' },
+  },
+};
+
+// ═══════════════════════════════════════════════════
+// 2. APPLICATION STATE
+// ═══════════════════════════════════════════════════
+
+const state = {
+  currentState: 'IDLE',
+  menuGuard: 'tc',
+  idType: true,
+  epsServices: true,
+  procsAndMeds: true,
+  chatMessage: true,
+  renewalResult: 'success',
+  selectedNode: null,
+  transitionLog: [],
+  isRunningPreset: false,
+  zoomLevel: 1,
+};
+
+// ═══════════════════════════════════════════════════
+// 3. SVG HELPERS
+// ═══════════════════════════════════════════════════
+
+function getAnchor(nodeId, side, offset = 0) {
+  const n = NODES[nodeId];
+  const h = n.h || NH;
+  switch (side) {
+    case 'top':    return { x: n.cx + offset, y: n.cy - h / 2 };
+    case 'bottom': return { x: n.cx + offset, y: n.cy + h / 2 };
+    case 'left':   return { x: n.cx - n.w / 2, y: n.cy + offset };
+    case 'right':  return { x: n.cx + n.w / 2, y: n.cy + offset };
+  }
+}
+
+function buildPath(start, end, fromSide, toSide) {
+  if (fromSide === toSide) {
+    if (fromSide === 'left' || fromSide === 'right') {
+      const dir = fromSide === 'left' ? -1 : 1;
+      const outX = (fromSide === 'left' ? Math.min(start.x, end.x) : Math.max(start.x, end.x)) + dir * 60;
+      return `M ${start.x} ${start.y} C ${outX} ${start.y}, ${outX} ${end.y}, ${end.x} ${end.y}`;
+    }
+    const dir = fromSide === 'top' ? -1 : 1;
+    const outY = (fromSide === 'top' ? Math.min(start.y, end.y) : Math.max(start.y, end.y)) + dir * 60;
+    return `M ${start.x} ${start.y} C ${start.x} ${outY}, ${end.x} ${outY}, ${end.x} ${end.y}`;
+  }
+  if ((fromSide === 'bottom' && toSide === 'top') || (fromSide === 'top' && toSide === 'bottom')) {
+    const midY = (start.y + end.y) / 2;
+    return `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
+  }
+  const midX = (start.x + end.x) / 2;
+  return `M ${start.x} ${start.y} C ${midX} ${start.y}, ${midX} ${end.y}, ${end.x} ${end.y}`;
+}
+
+function bezierMid(start, end, fromSide, toSide) {
+  let c1, c2;
+  if (fromSide === toSide) {
+    if (fromSide === 'left' || fromSide === 'right') {
+      const dir = fromSide === 'left' ? -1 : 1;
+      const outX = (fromSide === 'left' ? Math.min(start.x, end.x) : Math.max(start.x, end.x)) + dir * 60;
+      c1 = { x: outX, y: start.y }; c2 = { x: outX, y: end.y };
+    } else {
+      const dir = fromSide === 'top' ? -1 : 1;
+      const outY = (fromSide === 'top' ? Math.min(start.y, end.y) : Math.max(start.y, end.y)) + dir * 60;
+      c1 = { x: start.x, y: outY }; c2 = { x: end.x, y: outY };
+    }
+  } else if ((fromSide === 'bottom' && toSide === 'top') || (fromSide === 'top' && toSide === 'bottom')) {
+    const midY = (start.y + end.y) / 2;
+    c1 = { x: start.x, y: midY }; c2 = { x: end.x, y: midY };
+  } else {
+    const midX = (start.x + end.x) / 2;
+    c1 = { x: midX, y: start.y }; c2 = { x: midX, y: end.y };
+  }
+  return {
+    x: (start.x + 3 * c1.x + 3 * c2.x + end.x) / 8,
+    y: (start.y + 3 * c1.y + 3 * c2.y + end.y) / 8,
+  };
+}
+
+// ═══════════════════════════════════════════════════
+// 4. SVG RENDERING
+// ═══════════════════════════════════════════════════
+
+function renderDiagram() {
+  const svg = document.getElementById('diagram');
+  const w = CANVAS_W * state.zoomLevel;
+  const h = CANVAS_H * state.zoomLevel;
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${CANVAS_W} ${CANVAS_H}`);
+
+  let html = '';
+
+  // Defs
+  html += `<defs>`;
+  html += `<pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.4"/>
+  </pattern>`;
+  Object.entries(CONN_COLORS).forEach(([type, color]) => {
+    html += `<marker id="arrow-${type}" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="${color}"/>
+    </marker>`;
+  });
+  html += `</defs>`;
+
+  // Background
+  html += `<rect width="${CANVAS_W}" height="${CANVAS_H}" fill="url(#grid)"/>`;
+
+  // Phase labels
+  PHASE_LABELS.forEach(p => {
+    html += `<text class="phase-label" x="${p.x}" y="${p.y}">${p.text}</text>`;
+  });
+
+  // Connections (below nodes)
+  const connLabelData = [];
+  CONNECTIONS.forEach(conn => {
+    const start = getAnchor(conn.from, conn.fromSide, conn.fromOff);
+    const end = getAnchor(conn.to, conn.toSide, conn.toOff);
+    const path = buildPath(start, end, conn.fromSide, conn.toSide);
+    const mid = bezierMid(start, end, conn.fromSide, conn.toSide);
+    const color = CONN_COLORS[conn.type];
+    const dash = conn.type === 'guard-fail' ? ' stroke-dasharray="6 3"' : '';
+
+    html += `<g data-conn="${conn.id}">`;
+    html += `<path class="conn-path" d="${path}" stroke="${color}" stroke-width="1.5" fill="none"${dash} marker-end="url(#arrow-${conn.type})"/>`;
+    html += `</g>`;
+
+    connLabelData.push({ id: conn.id, mid, color, label: conn.label });
+  });
+
+  // Nodes
+  Object.entries(NODES).forEach(([id, n]) => {
+    const isActive = state.currentState === id;
+    const isSelected = state.selectedNode === id;
+    const classes = ['node', `type-${n.type}`];
+    if (isActive) classes.push('node-active');
+    if (isSelected) classes.push('node-selected');
+
+    const h = n.h || NH;
+    const rx = n.cx - n.w / 2;
+    const ry = n.cy - h / 2;
+
+    html += `<g data-node="${id}" class="${classes.join(' ')}">`;
+    html += `<rect x="${rx}" y="${ry}" width="${n.w}" height="${h}" rx="8" fill="${n.fill}" stroke="${n.stroke}"/>`;
+
+    if (Array.isArray(n.label)) {
+      html += `<text x="${n.cx}" y="${n.cy - 6}" text-anchor="middle" fill="${n.textColor}" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">`;
+      html += `<tspan x="${n.cx}" dy="0">${n.label[0]}</tspan>`;
+      html += `<tspan x="${n.cx}" dy="13">${n.label[1]}</tspan>`;
+      html += `</text>`;
+    } else {
+      html += `<text x="${n.cx}" y="${n.cy + 4}" text-anchor="middle" fill="${n.textColor}" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">${n.label}</text>`;
+    }
+
+    // Final state double border
+    if (n.type === 'final') {
+      html += `<rect x="${rx + 4}" y="${ry + 4}" width="${n.w - 8}" height="${h - 8}" rx="5" fill="none" stroke="${n.stroke}" stroke-width="1" opacity="0.4"/>`;
+    }
+
+    html += `</g>`;
+  });
+
+  // Connection labels (on top)
+  connLabelData.forEach(({ mid, color, label }) => {
+    const labelW = label.length * 6 + 10;
+    const labelH = 14;
+    html += `<rect class="conn-label-bg" x="${mid.x - labelW / 2}" y="${mid.y - labelH / 2 - 1}" width="${labelW}" height="${labelH}" rx="3"/>`;
+    html += `<text class="conn-label" x="${mid.x}" y="${mid.y + 3}" text-anchor="middle" fill="${color}">${label}</text>`;
+  });
+
+  // Legend
+  const legendX = CANVAS_W - 320;
+  const legendY = CANVAS_H - 30;
+  const legendItems = [
+    { color: '#3b82f6', label: 'Initial' },
+    { color: '#8b5cf6', label: 'Invoke' },
+    { color: '#f59e0b', label: 'Waiting' },
+    { color: '#10b981', label: 'Final' },
+  ];
+  legendItems.forEach((item, i) => {
+    const x = legendX + i * 70;
+    html += `<circle cx="${x}" cy="${legendY}" r="4" fill="${item.color}"/>`;
+    html += `<text class="legend-text" x="${x + 8}" y="${legendY + 3.5}">${item.label}</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// 5. SIMULATION ENGINE
+// ═══════════════════════════════════════════════════
+
+function doTransition(to, event, connId) {
+  const from = state.currentState;
+  state.transitionLog.push({ from, to, event });
+  state.currentState = to;
+  renderAll();
+
+  if (connId) {
+    const connEl = document.querySelector(`[data-conn="${connId}"] .conn-path`);
+    if (connEl) {
+      connEl.classList.add('active');
+      setTimeout(() => connEl.classList.remove('active'), 700);
+    }
+  }
+}
+
+function sendEvent(eventType) {
+  const s = state.currentState;
+
+  if (s === 'COMPLETED') return;
+
+  // IDLE
+  if (s === 'IDLE' && eventType === 'WS_CLIENT_READY') {
+    doTransition('WAKING_UP_EPS_BOT', 'WS_CLIENT_READY', 'idle-waking');
+    return;
+  }
+
+  // INVOKE states: accept INVOKE_DONE or INVOKE_ERROR
+  if (INVOKE_STATES.has(s)) {
+    if (eventType === 'INVOKE_DONE') {
+      // Find the onDone transition
+      const info = STATE_INFO[s];
+      const doneTrans = info.transitions.find(t => t.event.includes('onDone'));
+      if (doneTrans) {
+        // Find matching connection
+        const conn = CONNECTIONS.find(c => c.from === s && c.type === 'success');
+        doTransition(doneTrans.target, 'invoke:onDone', conn?.id);
+      }
+      return;
+    }
+    if (eventType === 'INVOKE_ERROR') {
+      doTransition('COMPLETED', 'invoke:onError', null);
+      return;
+    }
+    return;
+  }
+
+  // WAITING states: accept MESSAGE_RECEIVED
+  if (WAITING_STATES.has(s) && eventType === 'MESSAGE_RECEIVED') {
+    // Special cases with multi-guard logic
+    if (s === 'WAITING_FOR_MAIN_MENU') {
+      if (state.menuGuard === 'tc') {
+        doTransition('SENDING_ACCEPT_TERMS_AND_CONDITIONS', 'MESSAGE_RECEIVED [guard: T&C]', 'mainmenu-sendtc');
+      } else if (state.menuGuard === 'alt') {
+        doTransition('WAITING_FOR_ID_TYPE_LIST', 'MESSAGE_RECEIVED [guard: alt]', 'mainmenu-skip-tc');
+      } else {
+        doTransition('COMPLETED', 'MESSAGE_RECEIVED [guard: fail]', null);
+      }
+      return;
+    }
+
+    if (s === 'WAITING_FOR_ID_TYPE_LIST') {
+      if (state.idType) {
+        doTransition('SENDING_ID_TYPE', 'MESSAGE_RECEIVED [guard: pass]', 'idtype-list-send');
+      } else {
+        doTransition('COMPLETED', 'MESSAGE_RECEIVED [guard: fail]', null);
+      }
+      return;
+    }
+
+    if (s === 'WAITING_FOR_EPS_SERVICES_LIST') {
+      if (state.epsServices) {
+        doTransition('SENDING_SELECTED_EPS_SERVICE', 'MESSAGE_RECEIVED [guard: pass]', 'waiteps-sendeps');
+      } else {
+        doTransition('COMPLETED', 'MESSAGE_RECEIVED [guard: fail]', null);
+      }
+      return;
+    }
+
+    if (s === 'WAITING_FOR_PROCS_AND_MEDS_MENU') {
+      if (state.procsAndMeds) {
+        doTransition('SENDING_SELECTED_PROCS_AND_MEDS_OPTION', 'MESSAGE_RECEIVED [guard: pass]', 'waitprocs-sendprocs');
+      } else {
+        doTransition('COMPLETED', 'MESSAGE_RECEIVED [guard: fail]', null);
+      }
+      return;
+    }
+
+    if (s === 'WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS') {
+      if (state.renewalResult === 'success') {
+        doTransition('SENDING_SUCCESS_MESSAGE_ALERT', 'MESSAGE_RECEIVED [success]', 'waitresult-success');
+      } else {
+        doTransition('SENDING_NOTHING_TO_RENEW_MESSAGE', 'MESSAGE_RECEIVED [nothing]', 'waitresult-nothing');
+      }
+      return;
+    }
+
+    // Generic WAITING states that use checkChatMessage
+    if (state.chatMessage) {
+      const info = STATE_INFO[s];
+      const passTrans = info.transitions.find(t => t.event.includes('pass'));
+      if (passTrans) {
+        const conn = CONNECTIONS.find(c => c.from === s && (c.type === 'guard-pass' || c.type === 'success'));
+        doTransition(passTrans.target, 'MESSAGE_RECEIVED [guard: pass]', conn?.id);
+      }
+    } else {
+      doTransition('COMPLETED', 'MESSAGE_RECEIVED [guard: fail]', null);
+    }
+    return;
+  }
+}
+
+function resetSimulation() {
+  state.currentState = 'IDLE';
+  state.transitionLog = [];
+  state.selectedNode = null;
+  state.isRunningPreset = false;
+  state.menuGuard = 'tc';
+  state.idType = true;
+  state.epsServices = true;
+  state.procsAndMeds = true;
+  state.chatMessage = true;
+  state.renewalResult = 'success';
+
+  // Reset UI controls
+  document.querySelectorAll('input[name="menuGuard"]').forEach(r => { r.checked = r.value === 'tc'; });
+  document.querySelectorAll('input[name="renewalResult"]').forEach(r => { r.checked = r.value === 'success'; });
+  ['idType', 'epsServices', 'procsAndMeds', 'chatMessage'].forEach(g => {
+    document.getElementById(`${g}Toggle`).checked = true;
+    const label = document.getElementById(`${g}Label`);
+    label.textContent = 'PASS';
+    label.className = 'toggle-value pass';
+  });
+
+  renderAll();
+}
+
+async function runPreset(presetId) {
+  if (state.isRunningPreset) return;
+  resetSimulation();
+
+  const preset = PRESETS[presetId];
+  state.isRunningPreset = true;
+
+  // Set guards
+  const g = preset.guards;
+  state.menuGuard = g.menuGuard;
+  state.idType = g.idType;
+  state.epsServices = g.epsServices;
+  state.procsAndMeds = g.procsAndMeds;
+  state.chatMessage = g.chatMessage;
+  state.renewalResult = g.renewalResult;
+
+  // Update UI to match
+  document.querySelectorAll('input[name="menuGuard"]').forEach(r => { r.checked = r.value === g.menuGuard; });
+  document.querySelectorAll('input[name="renewalResult"]').forEach(r => { r.checked = r.value === g.renewalResult; });
+  ['idType', 'epsServices', 'procsAndMeds', 'chatMessage'].forEach(key => {
+    document.getElementById(`${key}Toggle`).checked = g[key];
+    const label = document.getElementById(`${key}Label`);
+    label.textContent = g[key] ? 'PASS' : 'FAIL';
+    label.className = `toggle-value ${g[key] ? 'pass' : 'fail'}`;
+  });
+
+  for (const step of preset.steps) {
+    await new Promise(r => setTimeout(r, 400));
+    if (!state.isRunningPreset) break;
+    sendEvent(step);
+
+    // Auto-scroll to keep current node visible
+    const nodeEl = document.querySelector(`[data-node="${state.currentState}"]`);
+    if (nodeEl) {
+      const rect = nodeEl.getBoundingClientRect();
+      const container = document.getElementById('canvasInner');
+      const containerRect = container.getBoundingClientRect();
+      if (rect.bottom > containerRect.bottom || rect.top < containerRect.top) {
+        const n = NODES[state.currentState];
+        container.scrollTo({ top: (n.cy - 200) * state.zoomLevel, behavior: 'smooth' });
+      }
+    }
+  }
+
+  state.isRunningPreset = false;
+  updateControls();
+}
+
+// ═══════════════════════════════════════════════════
+// 6. UI UPDATES
+// ═══════════════════════════════════════════════════
+
+function updateControls() {
+  const s = state.currentState;
+  document.getElementById('btnWs').disabled = s !== 'IDLE';
+  document.getElementById('btnMsg').disabled = !WAITING_STATES.has(s);
+  document.getElementById('btnResolve').disabled = !INVOKE_STATES.has(s);
+  document.getElementById('btnReject').disabled = !INVOKE_STATES.has(s);
+}
+
+function updateLog() {
+  const el = document.getElementById('transitionLog');
+  if (state.transitionLog.length === 0) {
+    el.innerHTML = '<div class="log-entry log-empty">No transitions yet</div>';
+    return;
+  }
+  el.innerHTML = state.transitionLog.map((entry, i) =>
+    `<div class="log-entry">
+      <span class="log-index">${i + 1}.</span>
+      <span class="log-from">${entry.from}</span>
+      <span class="log-arrow">&rarr;</span>
+      <span class="log-to">${entry.to}</span>
+      <div class="log-event">${entry.event}</div>
+    </div>`
+  ).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function showDetails(nodeId) {
+  state.selectedNode = nodeId;
+  const info = STATE_INFO[nodeId];
+  const el = document.getElementById('stateDetails');
+
+  let html = `<div class="detail-name">${nodeId}</div>`;
+  html += `<div class="detail-type t-${info.type}">${info.type}</div>`;
+  html += `<div class="detail-desc">${info.description}</div>`;
+
+  if (info.invoke) {
+    html += `<div class="detail-section">`;
+    html += `<div class="detail-label">Invoke Service</div>`;
+    html += `<code>${info.invoke.service} (id: ${info.invoke.id})</code>`;
+    html += `<div class="detail-label">Input</div>`;
+    html += `<code>${info.invoke.input}</code>`;
+    html += `</div>`;
+  }
+
+  if (info.guard) {
+    html += `<div class="detail-section">`;
+    html += `<div class="detail-label">Guard</div>`;
+    html += `<code>${info.guard.name}</code>`;
+    html += `<div style="font-size:11px;color:#94a3b8;margin-top:2px;">${info.guard.description}</div>`;
+    html += `</div>`;
+  }
+
+  if (info.transitions.length > 0) {
+    html += `<div class="detail-section">`;
+    html += `<div class="detail-label">Transitions</div>`;
+    info.transitions.forEach(t => {
+      html += `<div class="detail-transition"><span class="arrow">&rarr;</span> ${t.target} <span class="detail-event">${t.event}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  el.innerHTML = html;
+  renderDiagram();
+}
+
+function updatePrompt() {
+  const el = document.getElementById('promptOutput');
+  const parts = [];
+
+  parts.push('Analyze the renewMedsMachine XState state machine for the EPS Sura WhatsApp medication renewal bot.');
+  parts.push('');
+  parts.push(`Machine ID: "renewMeds"`);
+  parts.push(`Current state: ${state.currentState}`);
+
+  if (state.transitionLog.length > 0) {
+    parts.push('');
+    parts.push('Transition path:');
+    state.transitionLog.forEach((entry, i) => {
+      parts.push(`  ${i + 1}. ${entry.from} -> ${entry.to} (${entry.event})`);
+    });
+  }
+
+  const notes = [];
+  if (state.menuGuard === 'alt') {
+    notes.push('Using alternative welcome path (skips T&C acceptance)');
+  } else if (state.menuGuard === 'neither') {
+    notes.push('Both menu guards fail — unrecognized message');
+  }
+  if (!state.idType) notes.push('checkIdTypeList guard is set to FAIL');
+  if (!state.epsServices) notes.push('checkEpsServicesList guard is set to FAIL');
+  if (!state.procsAndMeds) notes.push('checkProcsAndMedsMenu guard is set to FAIL');
+  if (!state.chatMessage) notes.push('checkChatMessage guard is set to FAIL');
+  if (state.renewalResult === 'nothing') notes.push('Renewal result set to "nothing to renew"');
+
+  if (state.currentState === 'COMPLETED' && state.transitionLog.length > 0) {
+    const last = state.transitionLog[state.transitionLog.length - 1];
+    if (last.event.includes('onError')) notes.push('Machine ended via error path');
+    else if (last.event.includes('fail')) notes.push('Machine ended because guard rejected the message');
+    else if (last.from === 'SENDING_SUCCESS_MESSAGE_ALERT') notes.push('Machine ended after successful renewal');
+    else if (last.from === 'SENDING_NOTHING_TO_RENEW_MESSAGE') notes.push('Machine ended — nothing to renew');
+  }
+  if (notes.length > 0) {
+    parts.push('');
+    parts.push('Notes:');
+    for (const n of notes) parts.push(`  - ${n}`);
+  }
+
+  parts.push('');
+  parts.push('Full state flow: IDLE → WAKING_UP → WAITING_MAIN_MENU → [T&C branch] → ID_TYPE → ID_NUMBER → EPS_SERVICES → PROCS_AND_MEDS → PROCEDURES → PRESCRIPTION_WARNING → BIRTHDATE → CONFIRMATION → RENEWAL_RESULT → [SUCCESS_ALERT | NOTHING_TO_RENEW] → COMPLETED');
+  parts.push('Services: sendMessageService (WhatsApp message sender, injected via .provide())');
+  parts.push('Guards: checkTermAndConditionsMenu, checkAbsenceOfTermAndConditionsMenu, checkIdTypeList, checkChatMessage, checkEpsServicesList, checkProcsAndMedsMenu');
+  parts.push('Context: { messageFromEps, idType, idNumber, birthdate, userToAlertChatId, successAlertMessage, nothingToRenewAlertMessage }');
+
+  el.textContent = parts.join('\n');
+}
+
+function renderAll() {
+  renderDiagram();
+  updateControls();
+  updateLog();
+  updatePrompt();
+}
+
+// ═══════════════════════════════════════════════════
+// 7. EVENT HANDLERS
+// ═══════════════════════════════════════════════════
+
+function setMenuGuard(value) {
+  state.menuGuard = value;
+  updatePrompt();
+}
+
+function setRenewalResult(value) {
+  state.renewalResult = value;
+  updatePrompt();
+}
+
+function toggleGuard(guardName) {
+  const toggle = document.getElementById(`${guardName}Toggle`);
+  state[guardName] = toggle.checked;
+  const label = document.getElementById(`${guardName}Label`);
+  label.textContent = state[guardName] ? 'PASS' : 'FAIL';
+  label.className = `toggle-value ${state[guardName] ? 'pass' : 'fail'}`;
+  updatePrompt();
+}
+
+function zoom(dir) {
+  if (dir === 0) {
+    state.zoomLevel = 1;
+  } else {
+    state.zoomLevel = Math.max(0.5, Math.min(2, state.zoomLevel + dir * 0.25));
+  }
+  renderDiagram();
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+
+// Click delegation on SVG
+document.getElementById('diagram').addEventListener('click', (e) => {
+  const nodeEl = e.target.closest('[data-node]');
+  if (nodeEl) {
+    showDetails(nodeEl.dataset.node);
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// 8. INITIALIZATION
+// ═══════════════════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>

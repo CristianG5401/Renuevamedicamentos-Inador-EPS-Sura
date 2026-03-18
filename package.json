@@ -1,0 +1,25 @@
+{
+  "name": "bot-renuevamedicamentos-inador-eps",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "start:watch": "bun --watch src/index.ts",
+    "format:changed": "git diff --name-only HEAD --relative -- . | xargs -r biome format --write",
+    "format:staged": "git diff --cached --name-only --relative -- . | xargs -r biome format --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.4",
+    "@types/bun": "1.3.9",
+    "@types/qrcode-terminal": "0.12.2"
+  },
+  "peerDependencies": {
+    "typescript": "5"
+  },
+  "dependencies": {
+    "qrcode-terminal": "0.12.0",
+    "whatsapp-web.js": "1.34.6",
+    "xstate": "5.28.0"
+  }
+}

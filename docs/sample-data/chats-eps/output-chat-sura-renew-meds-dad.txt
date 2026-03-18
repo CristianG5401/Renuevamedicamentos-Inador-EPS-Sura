@@ -1,0 +1,150 @@
+bun start
+$ bun run src/index.ts
+¡Cliente de WhatsApp listo y conectado!
+Iniciando solicitud de medicamentos...
+EPS dice: escribe el número de documento de identificación sin puntos, comas o cualquier otro carácter {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Escribe el número de documento de identificación sin puntos, comas o cualquier otro carácter",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice:  {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "",
+  type: "list",
+  list: {
+    rawData: {
+      $$unknownFieldCount: 0,
+      sections: [
+        [Object ...]
+      ],
+      description: "𝗔𝘃𝗶𝘀𝗼 ⏰: \nTen presente que después de 5 minutos de inactividad, se cerrará el chat.\n\nHUGO, selecciona la opción que necesitas:",
+      buttonText: "Elige la opción ...",
+      listType: 1,
+    },
+    sections: [
+      [Object ...]
+    ],
+    options: [
+      [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...], [Object ...]
+    ],
+  },
+}
+EPS dice: elige la opción: {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Elige la opción:",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: digita el número de la opción que necesitas
+
+ 1. solicitud de autorizaciones de salud
+ 2. consulta de autorizaciones
+ 3. renovación mensual formula de medicamentos
+ 4. gestión de fórmula de medicamentos por finalización de tratamiento
+ 5. solicitud de cambios en la autorización
+ 6. recibir orientación sobre otros procesos (citas médicas, atención virtual, turno virtual entre otros)
+ 7. volver al menú anterior
+ 8.  cerrar {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Digita el número de la opción que necesitas\n\n 1. Solicitud de autorizaciones de salud\n 2. Consulta de autorizaciones\n 3. Renovación mensual formula de medicamentos\n 4. Gestión de fórmula de medicamentos por finalización de tratamiento\n 5. Solicitud de cambios en la autorización\n 6. Recibir orientación sobre otros procesos (citas médicas, atención virtual, turno virtual entre otros)\n 7. Volver al menú anterior\n 8.  Cerrar",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: si tienes una fórmula vigente para varios meses y ya te correponde la fecha de entrega, esta opción te permite generar la autorizacion para la entrega mes a mes.
+si tuviste tu última entrega del medicamento, escríbenos al whatsapp 317 518 02 37 y elige la opción  *medicamentos* y luego *gestión de fórmula de medicamentos por finalización de tratamiento* o solicita una cita con tu médico tratante. {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Si tienes una fórmula vigente para varios meses y ya te correponde la fecha de entrega, esta opción te permite generar la autorizacion para la entrega mes a mes.\nSi tuviste tu última entrega del medicamento, escríbenos al WhatsApp 317 518 02 37 y elige la opción  *Medicamentos* y luego *Gestión de fórmula de medicamentos por finalización de tratamiento* o solicita una cita con tu médico tratante.",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: ¿cuál es tu fecha de nacimiento? (dd/mm/aaaa) {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "¿Cuál es tu fecha de nacimiento? (DD/MM/AAAA)",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: hemos recibido la solicitud para renovar la fórmula de tus medicamentos. *recuerda:* para que el proceso sea exitoso, debes tener un tratamiento vigente con entregas pendientes y ya debe ser la fecha de próxima entrega. {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Hemos recibido la solicitud para renovar la fórmula de tus medicamentos. *Recuerda:* para que el proceso sea exitoso, debes tener un tratamiento vigente con entregas pendientes y ya debe ser la fecha de próxima entrega.",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice:  {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "",
+  type: "image",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: luego de revisar tu solicitud, identificamos que aún no es la fecha de renovación de tus medicamentos.
+
+para conocer el detalle de tus medicamentos, ingresa a epssura.com con tu usuario y contraseña y selecciona la opción "medicamentos" ingresa aqui:
+https://bit.ly/tramitesvirtualeseps {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Luego de revisar tu solicitud, identificamos que aún no es la fecha de renovación de tus medicamentos.\n\nPara conocer el detalle de tus medicamentos, ingresa a epssura.com con tu usuario y contraseña y selecciona la opción \"Medicamentos\" Ingresa aqui:\nhttps://bit.ly/TramitesVirtualesEPS",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: gracias por utilizar nuestros servicios. {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Gracias por utilizar nuestros servicios.",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
+EPS dice: gracias por escribirnos al whatsapp de sura. {
+  from: "573175180237@c.us",
+  to: "573128929063@c.us",
+  body: "Gracias por escribirnos al WhatsApp de SURA.",
+  type: "chat",
+  list: {
+    rawData: undefined,
+    sections: undefined,
+    options: undefined,
+  },
+}
