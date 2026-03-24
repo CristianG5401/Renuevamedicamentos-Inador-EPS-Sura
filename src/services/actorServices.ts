@@ -1,7 +1,7 @@
 import { fromPromise } from "xstate";
 
-import { ENV } from "../config.ts";
-import type { WhatsAppPort } from "../ports/whatsappPort.ts";
+import { ENV } from "../config";
+import type { WhatsAppPort } from "../ports/whatsappPort";
 
 const TYPING_SIMULATION_DELAY_MS = 2000;
 

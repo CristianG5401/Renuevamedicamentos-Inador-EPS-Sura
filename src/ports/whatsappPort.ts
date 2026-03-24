@@ -1,4 +1,4 @@
-import type { ListOption } from "../domain/types.ts";
+import type { ListOption } from "../domain/types";
 
 /**
  * Estructura de mensaje normalizada, agnóstica de librería.

@@ -1,5 +1,5 @@
-import type { MessageFromEps } from "../../domain/types.ts";
-import type { IncomingMessage } from "../whatsappPort.ts";
+import type { MessageFromEps } from "../../domain/types";
+import type { IncomingMessage } from "../whatsappPort";
 
 /**
  * Transforma un IncomingMessage (agnóstico de librería) al tipo de dominio
