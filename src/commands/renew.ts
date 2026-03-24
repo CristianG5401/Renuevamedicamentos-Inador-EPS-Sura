@@ -4,6 +4,8 @@ import { defineCommand } from "citty";
 import { ID_TYPES_ARRAY } from "../domain/constants";
 // Configuración
 import { ENV } from "../config";
+// Adapter
+import { WhatsAppWebJsAdapter } from "../adapters/whatsappWebJs";
 // Bot
 import { runRenewMedsBot } from "../bot";
 
@@ -60,14 +62,19 @@ export const renewCommand = defineCommand({
     },
   },
   run: ({ args }) => {
-    runRenewMedsBot({
-      idNumber: args.idNumber,
-      idType: args.idType,
-      birthdate: args.birthdate,
-      userToAlertChatId: args.userToAlertChatId,
-      successAlertMessage: args.successAlertMessage,
-      nothingToRenewAlertMessage: args.nothingToRenewAlertMessage,
-      techAlertChatId: args.techAlertChatId,
-    });
+    const whatsapp = new WhatsAppWebJsAdapter();
+
+    runRenewMedsBot(
+      {
+        idNumber: args.idNumber,
+        idType: args.idType,
+        birthdate: args.birthdate,
+        userToAlertChatId: args.userToAlertChatId,
+        successAlertMessage: args.successAlertMessage,
+        nothingToRenewAlertMessage: args.nothingToRenewAlertMessage,
+        techAlertChatId: args.techAlertChatId,
+      },
+      whatsapp,
+    );
   },
 });

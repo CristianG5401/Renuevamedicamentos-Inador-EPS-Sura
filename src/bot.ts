@@ -1,10 +1,10 @@
 import qrcode from "qrcode-terminal";
 import { createActor } from "xstate";
 
-import { WhatsAppWebJsAdapter } from "./adapters/whatsappWebJs";
 import { ENV, maskPhone } from "./config";
 import { EVENTS, renewMedsMachine } from "./domain/renewMedsMachine";
 import { parseEpsMessage } from "./ports/mappers/parseMessage";
+import type { WhatsAppPort } from "./ports/whatsappPort";
 import { createActorServices } from "./services/actorServices";
 
 interface RenewMedsBotConfig {
@@ -21,13 +21,12 @@ interface RenewMedsBotConfig {
 
 /**
  * Inicializa y ejecuta el bot de renovación de medicamentos.
- * Configura el cliente de WhatsApp, crea la máquina de estados XState,
- * y conecta los eventos del cliente con las transiciones de la máquina.
+ * Crea la máquina de estados XState y conecta los eventos del cliente
+ * de WhatsApp con las transiciones de la máquina.
  * @param config - Configuración del bot con datos del paciente y destinos de alertas
+ * @param whatsapp - Implementación del port de WhatsApp (inyectada por el caller)
  */
-export function runRenewMedsBot(config: RenewMedsBotConfig) {
-  // --- Configuración ---
-  const whatsapp = new WhatsAppWebJsAdapter();
+export function runRenewMedsBot(config: RenewMedsBotConfig, whatsapp: WhatsAppPort) {
 
   const renewMedsMachineWithDeps = renewMedsMachine.provide(
     createActorServices(whatsapp),
