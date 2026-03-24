@@ -249,19 +249,23 @@ Cada guard valida que el mensaje recibido del bot coincida con el paso esperado 
 
 ### Inyeccion de dependencias
 
-La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. En `bot.ts` se inyecta la implementacion real mediante el patron **Port/Adapter**:
+La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. La implementacion real se inyecta en dos pasos mediante el patron **Port/Adapter**:
 
 ```typescript
-// 1. Se crea el adapter concreto (la unica referencia a whatsapp-web.js)
+// commands/renew.ts — el CLI (driving adapter) instancia el adapter concreto
 const whatsapp = new WhatsAppWebJsAdapter();
+runRenewMedsBot(config, whatsapp);
 
-// 2. Se inyecta a traves de la factory, que solo conoce la interfaz WhatsAppPort
-const renewMedsMachineWithDeps = renewMedsMachine.provide(
-  createActorServices(whatsapp),
-);
+// bot.ts — solo conoce la interfaz WhatsAppPort, nunca el adapter concreto
+export function runRenewMedsBot(config: RenewMedsBotConfig, whatsapp: WhatsAppPort) {
+  const renewMedsMachineWithDeps = renewMedsMachine.provide(
+    createActorServices(whatsapp),
+  );
+  // ...
+}
 ```
 
-La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio y los servicios no se modifican.
+La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio, los servicios y `bot.ts` no se modifican.
 
 ## Playground interactivo
 
