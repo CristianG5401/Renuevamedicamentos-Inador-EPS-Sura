@@ -9,10 +9,7 @@
 // Objeto constante con todas las variables de entorno requeridas.
 // Para agregar una nueva variable, solo agrega una línea más aquí.
 const REQUIRED_ENV = {
-  BIRTHDATE: process.env.BIRTHDATE,
   EPS_CHAT_ID: process.env.EPS_CHAT_ID,
-  ID_NUMBER: process.env.ID_NUMBER,
-  ID_TYPE: process.env.ID_TYPE,
   NOTHING_TO_RENEW_ALERT_MESSAGE: process.env.NOTHING_TO_RENEW_ALERT_MESSAGE,
   SUCCESS_ALERT_MESSAGE: process.env.SUCCESS_ALERT_MESSAGE,
   TECH_ALERT_CHAT_ID: process.env.TECH_ALERT_CHAT_ID,
