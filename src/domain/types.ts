@@ -1,7 +1,5 @@
-export interface ListOption {
-  title: string;
-  rowId: string;
-}
+import type { ListOption } from "../ports/whatsappPort";
+
 export interface MessageFromEps {
   normalizedText: string;
   type: string;

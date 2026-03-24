@@ -100,9 +100,9 @@ renuevamedicamentos-inador/
 │   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
 │   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado
 │   │   ├── constants.ts                # Constantes de estados, eventos, tipos de documento
-│   │   └── types.ts                    # Interfaces TypeScript (contexto, input, opciones)
+│   │   └── types.ts                    # Interfaces TypeScript del dominio (contexto, input)
 │   ├── ports/                          # Contratos/interfaces (independientes de libreria)
-│   │   ├── whatsappPort.ts             # Interfaz WhatsAppPort + tipo IncomingMessage
+│   │   ├── whatsappPort.ts             # Interfaz WhatsAppPort + tipos IncomingMessage y ListOption
 │   │   └── mappers/
 │   │       └── parseMessage.ts         # Convierte mensajes crudos de WS al formato del port
 │   ├── adapters/                       # Implementaciones concretas de los ports

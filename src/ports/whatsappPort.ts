@@ -1,4 +1,10 @@
-import type { ListOption } from "../domain/types";
+/**
+ * Representa una opción seleccionable dentro de un list message de WhatsApp.
+ */
+export interface ListOption {
+  title: string;
+  rowId: string;
+}
 
 /**
  * Estructura de mensaje normalizada, agnóstica de librería.
