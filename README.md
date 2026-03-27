@@ -109,9 +109,9 @@ renuevamedicamentos-inador/
 │   │   └── whatsappWebJs.ts            # Adapter de whatsapp-web.js que implementa WhatsAppPort
 │   ├── services/                       # Servicios de aplicacion (conectan dominio con adapters)
 │   │   └── actorServices.ts            # Factory de actores XState con inyeccion de WhatsAppPort
-│   ├── bot.ts                          # Logica principal del bot (configura actor + WhatsApp)
-│   ├── config.ts                       # Validacion de env vars + utilidades de masking
-│   └── index.ts                        # Entry point: define la CLI con citty y registra subcomandos
+│   ├── orchestrator.ts                 # Orquestacion: configura actor, conecta WhatsApp y maneja ciclo de vida
+│   ├── config.ts                       # Validacion y merge de config (CLI args + env vars)
+│   └── cli.ts                          # Entry point: define la CLI con citty y registra subcomandos
 ├── docs/
 │   ├── renewMedsMachine-playground.html   # Playground interactivo
 │   └── sample-data/                       # Datos de ejemplo de mensajes de la EPS
@@ -253,19 +253,20 @@ La maquina declara un servicio `sendMessageService` con una implementacion por d
 
 ```typescript
 // commands/renew.ts — el CLI (driving adapter) instancia el adapter concreto
+const config = resolveConfig(args);
 const whatsapp = new WhatsAppWebJsAdapter();
-runRenewMedsBot(config, whatsapp);
+await startRenewal(config, whatsapp);
 
-// bot.ts — solo conoce la interfaz WhatsAppPort, nunca el adapter concreto
-export function runRenewMedsBot(config: RenewMedsBotConfig, whatsapp: WhatsAppPort) {
+// orchestrator.ts — solo conoce la interfaz WhatsAppPort, nunca el adapter concreto
+export function startRenewal(config: ValidatedConfig, whatsapp: WhatsAppPort): Promise<void> {
   const renewMedsMachineWithDeps = renewMedsMachine.provide(
-    createActorServices(whatsapp),
+    createActorServices(whatsapp, config.epsChatId),
   );
   // ...
 }
 ```
 
-La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio, los servicios y `bot.ts` no se modifican.
+La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio, los servicios y `orchestrator.ts` no se modifican.
 
 ## Playground interactivo
 
