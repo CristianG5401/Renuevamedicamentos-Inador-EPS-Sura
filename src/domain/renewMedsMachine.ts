@@ -1,4 +1,5 @@
 import { assign, fromPromise, setup } from "xstate";
+import consola from "consola";
 
 import { EVENTS, PROCEDURE_OPTIONS, STATES } from "./constants";
 import { guards } from "./guards";
@@ -64,7 +65,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al despertar al bot de la EPS", {
+              consola.error("** 🐞 Error al despertar al bot de la EPS", {
                 context,
                 event,
               });
@@ -100,7 +101,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_MAIN_MENU: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg.normalizedText },
                 );
@@ -125,7 +126,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error(
+              consola.error(
                 "** 🐞 Error al aceptar los terminos y condiciones",
                 {
                   context,
@@ -154,7 +155,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_ID_TYPE_LIST: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.list?.description },
                 );
@@ -178,7 +179,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al enviar el tipo de documento", {
+              consola.error("** 🐞 Error al enviar el tipo de documento", {
                 context,
                 event,
               });
@@ -208,7 +209,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_ID_NUMBER_INPUT_MESSAGE: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg.normalizedText },
                 );
@@ -232,7 +233,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al enviar el numero de documento", {
+              consola.error("** 🐞 Error al enviar el numero de documento", {
                 context,
                 event,
               });
@@ -258,7 +259,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_EPS_SERVICES_LIST: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.list?.description },
                 );
@@ -282,7 +283,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al enviar el servicio seleccionado", {
+              consola.error("** 🐞 Error al enviar el servicio seleccionado", {
                 context,
                 event,
               });
@@ -308,7 +309,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_PROCS_AND_MEDS_MENU: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.normalizedText },
                 );
@@ -332,7 +333,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error(
+              consola.error(
                 "** 🐞 Error al enviar la opción de trámites y medicamentos",
                 {
                   context,
@@ -364,7 +365,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_PROCEDURES_MESSAGE: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.normalizedText },
                 );
@@ -388,7 +389,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error(
+              consola.error(
                 "** 🐞 Error al enviar la opción de procedimiento",
                 {
                   context,
@@ -418,7 +419,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.normalizedText },
                 );
@@ -448,7 +449,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_BIRTHDATE_INPUT_MESSAGE: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.normalizedText },
                 );
@@ -471,7 +472,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al enviar la fecha de nacimiento", {
+              consola.error("** 🐞 Error al enviar la fecha de nacimiento", {
                 context,
                 event,
               });
@@ -498,7 +499,7 @@ export const renewMedsMachine = setup({
             target: STATES.COMPLETED,
             actions: [
               ({ event }) => {
-                console.warn(
+                consola.warn(
                   "⚠️ WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL: el mensaje recibido no coincide con el patrón esperado",
                   { receivedText: event.msg?.normalizedText },
                 );
@@ -562,7 +563,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error("** 🐞 Error al enviar el mensaje de alerta **", {
+              consola.error("** 🐞 Error al enviar el mensaje de alerta **", {
                 context,
                 event,
               });
@@ -585,7 +586,7 @@ export const renewMedsMachine = setup({
           target: STATES.COMPLETED,
           actions: [
             ({ context, event }) => {
-              console.error(
+              consola.error(
                 "** 🐞 Error al enviar el mensaje de nada que renovar **",
                 {
                   context,

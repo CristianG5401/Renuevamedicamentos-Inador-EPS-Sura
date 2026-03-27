@@ -1,3 +1,4 @@
+import consola from "consola";
 import type { MessageFromEps, RenewMedsContext } from "./types";
 
 /**
@@ -10,7 +11,7 @@ export const guards = {
     _: { context: RenewMedsContext },
     { msg }: { msg: MessageFromEps },
   ) => {
-    console.log("**🪼 checkTermAndConditionsMenu **", {
+    consola.debug("**🪼 checkTermAndConditionsMenu **", {
       msg,
     });
     if (!msg.dynamicReplyButtons?.displayTexts) return false;
@@ -33,7 +34,7 @@ export const guards = {
     _: unknown,
     { msg }: { msg: MessageFromEps },
   ) => {
-    console.log("**🪼 checkAbsenceOfTermAndConditionsMenu **", {
+    consola.debug("**🪼 checkAbsenceOfTermAndConditionsMenu **", {
       msg,
     });
     const isTermAndConditionsAlternativeMessage = msg.normalizedText.includes(
@@ -49,7 +50,7 @@ export const guards = {
     { context }: { context: RenewMedsContext },
     { msg }: { msg: MessageFromEps },
   ) => {
-    console.log("**🪼 checkIdTypeList **", {
+    consola.debug("**🪼 checkIdTypeList **", {
       msg,
     });
     if (msg.type !== "list") return false;
@@ -73,7 +74,7 @@ export const guards = {
     _: { context: RenewMedsContext },
     { msg, expectedText }: { msg: MessageFromEps; expectedText: string },
   ) => {
-    console.log("**🪼 checkChatMessage **", { msg, expectedText });
+    consola.debug("**🪼 checkChatMessage **", { msg, expectedText });
     if (msg.type !== "chat") return false;
     return msg?.normalizedText?.includes(expectedText);
   },
@@ -81,7 +82,7 @@ export const guards = {
     _: { context: RenewMedsContext },
     { msg }: { msg: MessageFromEps },
   ) => {
-    console.log("**🪼 checkEpsServicesList **", {
+    consola.debug("**🪼 checkEpsServicesList **", {
       msg,
     });
     if (msg.type !== "list") return false;
@@ -105,7 +106,7 @@ export const guards = {
     _: { context: RenewMedsContext },
     { msg }: { msg: MessageFromEps },
   ) => {
-    console.log("**🪼 checkProcsAndMedsMenu **", {
+    consola.debug("**🪼 checkProcsAndMedsMenu **", {
       msg,
     });
     if (!msg.dynamicReplyButtons?.displayTexts) return false;
