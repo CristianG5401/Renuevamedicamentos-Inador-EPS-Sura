@@ -42,3 +42,18 @@ export const EVENTS = {
   MESSAGE_RECEIVED: "MESSAGE_RECEIVED",
   WS_CLIENT_READY: "WS_CLIENT_READY",
 } as const;
+
+export const ID_TYPES = {
+  CEDULA_CIUDADANIA: "Cédula de ciudadanía",
+  CEDULA_EXTRANJERIA: "Cédula de extranjería",
+  TARJETA_IDENTIDAD: "Tarjeta de identidad",
+  NIT: "NIT",
+  PASAPORTE: "Pasaporte",
+  PASAPORTE_DIPLOMATICO: "Pasaporte diplomático",
+  REGISTRO_CIVIL: "Registro civil",
+  TARJETA_EXTRANJERIA: "Tarjeta de Extranjería",
+  NUIP: "NUIP",
+  OTHER: "Otro",
+} as const;
+
+export const ID_TYPES_ARRAY = Object.values(ID_TYPES);
