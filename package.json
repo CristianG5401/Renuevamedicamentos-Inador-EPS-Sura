@@ -1,11 +1,15 @@
 {
   "name": "bot-renuevamedicamentos-inador-eps",
-  "module": "index.ts",
+  "version": "1.0.0",
+  "module": "src/cli.ts",
   "type": "module",
   "private": true,
+  "bin": {
+    "renuevamedicamentos-inador": "./src/cli.ts"
+  },
   "scripts": {
-    "start": "bun run src/index.ts",
-    "start:watch": "bun --watch src/index.ts",
+    "start": "bun run src/cli.ts",
+    "start:watch": "bun --watch src/cli.ts",
     "format:changed": "git diff --name-only HEAD --relative -- . | xargs -r biome format --write",
     "format:staged": "git diff --cached --name-only --relative -- . | xargs -r biome format --write"
   },
@@ -18,6 +22,8 @@
     "typescript": "5"
   },
   "dependencies": {
+    "citty": "0.2.1",
+    "consola": "3.4.2",
     "qrcode-terminal": "0.12.0",
     "whatsapp-web.js": "1.34.6",
     "xstate": "5.28.0"

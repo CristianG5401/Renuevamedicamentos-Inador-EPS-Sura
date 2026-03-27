@@ -1,46 +1,71 @@
 /**
  * Módulo centralizado de configuración.
- * Valida las variables de entorno requeridas al iniciar (fail-fast)
+ * Valida las variables de entorno requeridas al iniciar (fail-fast),
+ * permite sobreescribir valores desde argumentos CLI,
  * y provee utilidades de masking para datos sensibles en los logs.
  *
  * Bun carga los archivos .env automáticamente — no se necesita dotenv.
  */
 
-// Objeto constante con todas las variables de entorno requeridas.
-// Para agregar una nueva variable, solo agrega una línea más aquí.
-const REQUIRED_ENV = {
-  BIRTHDATE: process.env.BIRTHDATE,
-  EPS_CHAT_ID: process.env.EPS_CHAT_ID,
-  ID_NUMBER: process.env.ID_NUMBER,
-  ID_TYPE: process.env.ID_TYPE,
-  NOTHING_TO_RENEW_ALERT_MESSAGE: process.env.NOTHING_TO_RENEW_ALERT_MESSAGE,
-  SUCCESS_ALERT_MESSAGE: process.env.SUCCESS_ALERT_MESSAGE,
-  TECH_ALERT_CHAT_ID: process.env.TECH_ALERT_CHAT_ID,
-  USER_TO_ALERT_CHAT_ID: process.env.USER_TO_ALERT_CHAT_ID,
-};
+/** Valores sobreescribibles desde la CLI (datos del usuario). */
+export interface CliOverrides {
+  idNumber?: string;
+  idType?: string;
+  birthdate?: string;
+  nothingToRenewAlertMessage?: string;
+  successAlertMessage?: string;
+  techAlertChatId?: string;
+  userToAlertChatId?: string;
+}
+
+/** Configuración validada con todos los campos requeridos como strings. */
+export interface ValidatedConfig {
+  birthdate: string;
+  epsChatId: string;
+  idNumber: string;
+  idType: string;
+  nothingToRenewAlertMessage: string;
+  successAlertMessage: string;
+  techAlertChatId: string;
+  userToAlertChatId: string;
+}
 
 /**
- * Valida que todas las variables de entorno requeridas estén presentes.
- * Filtra las keys del objeto para detectar las que faltan.
- * Lanza un error inmediatamente al importar si alguna falta.
- * @returns El objeto con los valores validados como strings (sin undefined)
+ * Resuelve la configuración final fusionando CLI args con variables de entorno.
+ * Prioridad: CLI args (más alta) → process.env → error si falta.
+ * @param overrides - Valores opcionales desde la CLI que sobreescriben .env
+ * @returns Configuración validada con todos los campos presentes
  */
-function validateEnv(): Record<keyof typeof REQUIRED_ENV, string> {
-  const missingVars = Object.entries(REQUIRED_ENV)
+export function resolveConfig(overrides?: CliOverrides): ValidatedConfig {
+  const resolved = {
+    birthdate: overrides?.birthdate ?? process.env.BIRTHDATE,
+    idNumber: overrides?.idNumber ?? process.env.ID_NUMBER,
+    idType: overrides?.idType ?? process.env.ID_TYPE,
+    nothingToRenewAlertMessage:
+      overrides?.nothingToRenewAlertMessage ??
+      process.env.NOTHING_TO_RENEW_ALERT_MESSAGE,
+    successAlertMessage:
+      overrides?.successAlertMessage ?? process.env.SUCCESS_ALERT_MESSAGE,
+    techAlertChatId:
+      overrides?.techAlertChatId ?? process.env.TECH_ALERT_CHAT_ID,
+    userToAlertChatId:
+      overrides?.userToAlertChatId ?? process.env.USER_TO_ALERT_CHAT_ID,
+    epsChatId: process.env.EPS_CHAT_ID,
+  };
+
+  const missingVars = Object.entries(resolved)
     .filter(([, value]) => !value)
     .map(([key]) => key);
 
   if (missingVars.length > 0) {
     throw new Error(
-      `Faltan variables de entorno requeridas: ${missingVars.join(", ")}.\n` +
-        "Crea un archivo .env basado en .env.example con los valores requeridos.",
+      `Faltan variables de configuración requeridas: ${missingVars.join(", ")}.\n` +
+        "Crea un archivo .env basado en .env.example o pasa los valores como argumentos CLI.",
     );
   }
 
-  return REQUIRED_ENV as Record<keyof typeof REQUIRED_ENV, string>;
+  return resolved as ValidatedConfig;
 }
-
-export const ENV = validateEnv();
 
 /**
  * Enmascara un chat ID de WhatsApp para logueo seguro.

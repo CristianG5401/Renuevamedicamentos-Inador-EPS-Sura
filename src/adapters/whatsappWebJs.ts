@@ -1,7 +1,6 @@
 import { Client, LocalAuth } from "whatsapp-web.js";
 
-import type { ListOption } from "../domain/types.ts";
-import type { IncomingMessage, WhatsAppPort } from "../ports/whatsappPort.ts";
+import type { IncomingMessage, ListOption, WhatsAppPort } from "../ports/whatsappPort";
 
 /**
  * Estructura de datos crudos extraída de los mensajes de whatsapp-web.js.

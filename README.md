@@ -12,6 +12,8 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 | [TypeScript](https://www.typescriptlang.org) | 5 | Tipado estatico |
 | [XState](https://xstate.js.org) | 5.28 | Maquina de estados para el flujo conversacional |
 | [whatsapp-web.js](https://wwebjs.dev) | 1.34 | Cliente de WhatsApp (Puppeteer + Chrome) |
+| [citty](https://github.com/unjs/citty) | 0.2 | Framework CLI para subcomandos y parsing de argumentos |
+| [consola](https://github.com/unjs/consola) | 3.4 | Logger estructurado para la CLI |
 | [Biome](https://biomejs.dev) | 2.4 | Linter y formatter |
 
 ## Prerequisitos
@@ -19,7 +21,7 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 - **Bun** instalado ([instrucciones](https://bun.sh/docs/installation))
 - **WhatsApp** con una sesion activa (para escanear el QR la primera vez)
 - El **Chat ID** del bot de la EPS (formato: `57XXXXXXXXXX@c.us`)
-- Tu **numero de cedula**, **tipo de documento** y **fecha de nacimiento**
+- Los datos del paciente: **numero de cedula**, **tipo de documento** y **fecha de nacimiento** (se pasan como argumentos CLI)
 - Un **Chat ID de destino** para recibir alertas del resultado de la renovacion
 
 ## Setup
@@ -40,20 +42,49 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 
     ```env
     EPS_CHAT_ID=57XXXXXXXXXX@c.us                      # Chat ID del bot de la EPS en WhatsApp
-    ID_NUMBER=XXXXXXXXXX                                # Tu numero de identificacion
-    ID_TYPE=Cédula de ciudadanía                        # Tipo de documento (como aparece en la lista de la EPS)
-    BIRTHDATE=DD/MM/AAAA                                # Tu fecha de nacimiento
     USER_TO_ALERT_CHAT_ID=57XXXXXXXXXX@c.us             # Chat ID donde enviar alertas de resultado
     SUCCESS_ALERT_MESSAGE=Tu mensaje de alerta aquí     # Mensaje cuando la renovacion es exitosa
     NOTHING_TO_RENEW_ALERT_MESSAGE=Tu mensaje aquí      # Mensaje cuando no hay medicamentos por renovar
     TECH_ALERT_CHAT_ID=57XXXXXXXXXX@c.us                # Chat ID para alertas de errores tecnicos
     ```
 
+## Uso
+
+El proyecto es una CLI con subcomandos. Para renovar los medicamentos de una persona:
+
+```bash
+bun run start renew \
+  --idType "Cédula de ciudadanía" \
+  --idNumber "1234567890" \
+  --birthdate "01/01/1990"
+```
+
+### Argumentos requeridos
+
+| Argumento | Descripcion |
+| --- | --- |
+| `--idType` | Tipo de documento (ej: `"Cédula de ciudadanía"`, `"Pasaporte"`, etc.) |
+| `--idNumber` | Numero de documento de la persona |
+| `--birthdate` | Fecha de nacimiento en formato `DD/MM/AAAA` |
+
+### Argumentos opcionales
+
+Si no se proporcionan, toman el valor de la variable de entorno correspondiente en `.env`:
+
+| Argumento | Default (env var) | Descripcion |
+| --- | --- | --- |
+| `--userToAlertChatId` | `USER_TO_ALERT_CHAT_ID` | Chat ID donde enviar alertas de resultado |
+| `--successAlertMessage` | `SUCCESS_ALERT_MESSAGE` | Mensaje al completar exitosamente |
+| `--nothingToRenewAlertMessage` | `NOTHING_TO_RENEW_ALERT_MESSAGE` | Mensaje cuando no hay medicamentos por renovar |
+| `--techAlertChatId` | `TECH_ALERT_CHAT_ID` | Chat ID para alertas de errores tecnicos |
+
+> Para ver todos los argumentos disponibles: `bun run start renew --help`
+
 ## Scripts
 
 | Comando | Descripcion |
 | --- | --- |
-| `bun run start` | Ejecuta el bot (entry point con XState) |
+| `bun run start` | Ejecuta la CLI (ver subcomandos con `--help`) |
 | `bun run start:watch` | Ejecuta en modo watch (reinicia al guardar cambios) |
 | `bun run format:changed` | Formatea archivos modificados (vs HEAD) con Biome |
 | `bun run format:staged` | Formatea archivos en staging con Biome |
@@ -61,23 +92,26 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 ## Estructura del proyecto
 
 ```txt
-eps-bot-prueba-1/
+renuevamedicamentos-inador/
 ├── src/
+│   ├── commands/                       # Subcomandos de la CLI (citty)
+│   │   └── renew.ts                   # Comando "renew": renueva medicamentos de una persona
 │   ├── domain/                         # Logica de negocio pura (sin dependencias externas)
 │   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
 │   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado
-│   │   ├── constants.ts                # Constantes de estados, eventos y opciones de procedimientos
-│   │   └── types.ts                    # Interfaces TypeScript (contexto, input, opciones)
+│   │   ├── constants.ts                # Constantes de estados, eventos, tipos de documento
+│   │   └── types.ts                    # Interfaces TypeScript del dominio (contexto, input)
 │   ├── ports/                          # Contratos/interfaces (independientes de libreria)
-│   │   ├── whatsappPort.ts             # Interfaz WhatsAppPort + tipo IncomingMessage
+│   │   ├── whatsappPort.ts             # Interfaz WhatsAppPort + tipos IncomingMessage y ListOption
 │   │   └── mappers/
 │   │       └── parseMessage.ts         # Convierte mensajes crudos de WS al formato del port
 │   ├── adapters/                       # Implementaciones concretas de los ports
 │   │   └── whatsappWebJs.ts            # Adapter de whatsapp-web.js que implementa WhatsAppPort
 │   ├── services/                       # Servicios de aplicacion (conectan dominio con adapters)
 │   │   └── actorServices.ts            # Factory de actores XState con inyeccion de WhatsAppPort
+│   ├── bot.ts                          # Logica principal del bot (configura actor + WhatsApp)
 │   ├── config.ts                       # Validacion de env vars + utilidades de masking
-│   └── index.ts                        # Entry point: crea adapter, inyecta deps, inicia actor
+│   └── index.ts                        # Entry point: define la CLI con citty y registra subcomandos
 ├── docs/
 │   ├── renewMedsMachine-playground.html   # Playground interactivo
 │   └── sample-data/                       # Datos de ejemplo de mensajes de la EPS
@@ -162,9 +196,9 @@ Los estados siguen un patron de pares: un estado `WAITING_FOR_*` espera un mensa
 | Estado | Que hace |
 | --- | --- |
 | `WAITING_FOR_ID_TYPE_LIST` | Espera la lista de tipos de documento (cedula, pasaporte, etc.) |
-| `SENDING_ID_TYPE` | Envia el tipo de documento configurado en `ID_TYPE` |
+| `SENDING_ID_TYPE` | Envia el tipo de documento proporcionado via CLI (`--idType`) |
 | `WAITING_FOR_ID_NUMBER_INPUT_MESSAGE` | Espera el prompt para ingresar el numero de documento |
-| `SENDING_ID_NUMBER` | Envia el numero de documento configurado en `ID_NUMBER` |
+| `SENDING_ID_NUMBER` | Envia el numero de documento proporcionado via CLI (`--idNumber`) |
 
 **Seleccion de servicio**
 
@@ -183,7 +217,7 @@ Los estados siguen un patron de pares: un estado `WAITING_FOR_*` espera un mensa
 | `SENDING_SELECTED_PROCEDURE_OPTION` | Envia "3" (renovacion mensual de formula de medicamentos) |
 | `WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING` | Espera el aviso sobre formulas vigentes |
 | `WAITING_FOR_BIRTHDATE_INPUT_MESSAGE` | Espera el prompt para ingresar la fecha de nacimiento |
-| `SENDING_BIRTHDATE` | Envia la fecha de nacimiento configurada en `BIRTHDATE` |
+| `SENDING_BIRTHDATE` | Envia la fecha de nacimiento proporcionada via CLI (`--birthdate`) |
 
 **Resultado**
 
@@ -208,26 +242,30 @@ Cada guard valida que el mensaje recibido del bot coincida con el paso esperado 
 | --- | --- |
 | `checkTermAndConditionsMenu` | Que el mensaje contenga el texto de bienvenida y que el primer boton sea "Acepto" |
 | `checkAbsenceOfTermAndConditionsMenu` | Camino alternativo: el bot saluda sin mostrar botones de T&C (ya fueron aceptados previamente) |
-| `checkIdTypeList` | Que la lista de tipos de documento contenga el tipo configurado en `ID_TYPE` |
+| `checkIdTypeList` | Que la lista de tipos de documento contenga el tipo proporcionado via CLI (`--idType`) |
 | `checkChatMessage` | Guard generico: valida que el texto del mensaje contenga una subcadena esperada (reutilizado en varios estados) |
 | `checkEpsServicesList` | Que la lista de servicios contenga "Tramites y Medicamentos" |
 | `checkProcsAndMedsMenu` | Que el menu de respuesta contenga el boton "Tramites" |
 
 ### Inyeccion de dependencias
 
-La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. En `index.ts` se inyecta la implementacion real mediante el patron **Port/Adapter**:
+La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. La implementacion real se inyecta en dos pasos mediante el patron **Port/Adapter**:
 
 ```typescript
-// 1. Se crea el adapter concreto (la unica referencia a whatsapp-web.js)
+// commands/renew.ts — el CLI (driving adapter) instancia el adapter concreto
 const whatsapp = new WhatsAppWebJsAdapter();
+runRenewMedsBot(config, whatsapp);
 
-// 2. Se inyecta a traves de la factory, que solo conoce la interfaz WhatsAppPort
-const renewMedsMachineWithDeps = renewMedsMachine.provide(
-  createActorServices(whatsapp),
-);
+// bot.ts — solo conoce la interfaz WhatsAppPort, nunca el adapter concreto
+export function runRenewMedsBot(config: RenewMedsBotConfig, whatsapp: WhatsAppPort) {
+  const renewMedsMachineWithDeps = renewMedsMachine.provide(
+    createActorServices(whatsapp),
+  );
+  // ...
+}
 ```
 
-La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio y los servicios no se modifican.
+La abstraccion `WhatsAppPort` define el contrato que cualquier cliente de WhatsApp debe cumplir (`sendMessage`, `onMessage`, etc.). Si se necesita cambiar de libreria (por ejemplo, de whatsapp-web.js a Baileys), basta con crear un nuevo adapter que implemente `WhatsAppPort` — el dominio, los servicios y `bot.ts` no se modifican.
 
 ## Playground interactivo
 
@@ -240,7 +278,8 @@ Abre `docs/renewMedsMachine-playground.html` en tu navegador para experimentar c
 
 ## Seguridad
 
-- Las credenciales (`EPS_CHAT_ID`, `ID_NUMBER`, `BIRTHDATE`, etc.) viven exclusivamente en `.env`, **nunca en el codigo fuente**
+- Las credenciales de entorno (`EPS_CHAT_ID`, Chat IDs de alerta, etc.) viven exclusivamente en `.env`, **nunca en el codigo fuente**
+- Los datos del paciente (`idNumber`, `idType`, `birthdate`) se pasan como argumentos CLI — no se almacenan en archivos
 - `.env` esta incluido en `.gitignore` — no se sube al repositorio
 - Los logs usan funciones de masking para no exponer datos sensibles:
   - `maskPhone()`: `573175180237@c.us` &rarr; `5731***0237@c.us`
