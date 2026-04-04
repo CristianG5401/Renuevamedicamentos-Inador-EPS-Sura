@@ -3,7 +3,7 @@ import { defineCommand } from "citty";
 // Constantes
 import { ID_TYPES_ARRAY } from "../domain/constants";
 // Configuración
-import { resolveConfig } from "../config";
+import { resolveConfig } from "../config/resolve";
 // Adapter
 import { WhatsAppWebJsAdapter } from "../adapters/whatsappWebJs";
 // Bot
@@ -51,7 +51,7 @@ export const renewCommand = defineCommand({
     },
   },
   run: async ({ args }) => {
-    const config = resolveConfig(args);
+    const config = await resolveConfig(args);
     const whatsapp = new WhatsAppWebJsAdapter();
 
     await startRenewal(config, whatsapp);
