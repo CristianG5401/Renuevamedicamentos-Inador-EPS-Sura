@@ -8,15 +8,14 @@ import type { ValidatedConfig } from "./types";
 import { getConfigDir, getConfigFilePath } from "./paths";
 
 /**
- * Carga el config.json global, retornando null si no existe.
- * Lanza error si el JSON está malformado (se propaga el error del parser de Bun).
+ * Carga el config.json global, retornando null si no existe o no se puede leer.
  */
 export async function loadGlobalConfig(): Promise<Partial<ValidatedConfig> | null> {
-  const file = Bun.file(getConfigFilePath());
-
-  if (!(await file.exists())) return null;
-
-  return file.json() as Promise<Partial<ValidatedConfig>>;
+  try {
+    return await Bun.file(getConfigFilePath()).json() as Partial<ValidatedConfig>;
+  } catch {
+    return null;
+  }
 }
 
 /**
