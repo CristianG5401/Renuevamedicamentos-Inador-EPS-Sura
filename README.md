@@ -32,13 +32,23 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
     bun install
     ```
 
-2. Crea el archivo de variables de entorno a partir de la plantilla:
+2. Configura tus datos. Hay dos opciones:
+
+    **Opcion A: Configuracion interactiva (recomendada)**
+
+    ```bash
+    bun run start init
+    ```
+
+    Esto lanza un asistente interactivo que crea el archivo de configuracion global en `~/.config/renuevamedicamentos-inador/config.json` ([XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/latest/)).
+
+    **Opcion B: Variables de entorno**
 
     ```bash
     cp .env.example .env
     ```
 
-3. Edita `.env` con tus datos reales:
+    Edita `.env` con tus datos reales:
 
     ```env
     EPS_CHAT_ID=57XXXXXXXXXX@c.us                      # Chat ID del bot de la EPS en WhatsApp
@@ -48,9 +58,25 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
     TECH_ALERT_CHAT_ID=57XXXXXXXXXX@c.us                # Chat ID para alertas de errores tecnicos
     ```
 
+    > **Prioridad de configuracion:** CLI args > `.env` (en cwd) > `config.json` (XDG global). Si un valor esta definido en multiples fuentes, gana la de mayor prioridad.
+
 ## Uso
 
-El proyecto es una CLI con subcomandos. Para renovar los medicamentos de una persona:
+El proyecto es una CLI con subcomandos.
+
+### Comando `init`
+
+Crea o actualiza el archivo de configuracion global de forma interactiva:
+
+```bash
+bun run start init
+```
+
+El asistente te pide cada dato (tipo de documento, numero, fecha de nacimiento, Chat IDs, mensajes de alerta) y guarda la configuracion en `~/.config/renuevamedicamentos-inador/config.json`. Si ya existe un archivo de configuracion, pregunta si deseas sobreescribirlo.
+
+### Comando `renew`
+
+Renueva los medicamentos de una persona:
 
 ```bash
 bun run start renew \
@@ -95,7 +121,13 @@ Si no se proporcionan, toman el valor de la variable de entorno correspondiente 
 renuevamedicamentos-inador/
 ├── src/
 │   ├── commands/                       # Subcomandos de la CLI (citty)
-│   │   └── renew.ts                   # Comando "renew": renueva medicamentos de una persona
+│   │   ├── renew.ts                   # Comando "renew": renueva medicamentos de una persona
+│   │   └── init.ts                    # Comando "init": crea config.json interactivamente
+│   ├── config/                         # Configuracion: resolucion, persistencia y rutas XDG
+│   │   ├── types.ts                   # Interfaz ValidatedConfig (fuente de verdad de tipos)
+│   │   ├── resolve.ts                 # Merge de config: CLI args > .env > config.json global
+│   │   ├── global-store.ts            # Lectura/escritura del config.json en ruta XDG
+│   │   └── paths.ts                   # Resolucion de rutas XDG (~/.config/<app>/config.json)
 │   ├── domain/                         # Logica de negocio pura (sin dependencias externas)
 │   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
 │   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado
@@ -109,8 +141,9 @@ renuevamedicamentos-inador/
 │   │   └── whatsappWebJs.ts            # Adapter de whatsapp-web.js que implementa WhatsAppPort
 │   ├── services/                       # Servicios de aplicacion (conectan dominio con adapters)
 │   │   └── actorServices.ts            # Factory de actores XState con inyeccion de WhatsAppPort
+│   ├── utils/                          # Utilidades compartidas
+│   │   └── masking.ts                 # Funciones de masking para datos sensibles en logs
 │   ├── orchestrator.ts                 # Orquestacion: configura actor, conecta WhatsApp y maneja ciclo de vida
-│   ├── config.ts                       # Validacion y merge de config (CLI args + env vars)
 │   └── cli.ts                          # Entry point: define la CLI con citty y registra subcomandos
 ├── docs/
 │   ├── renewMedsMachine-playground.html   # Playground interactivo
@@ -279,10 +312,11 @@ Abre `docs/renewMedsMachine-playground.html` en tu navegador para experimentar c
 
 ## Seguridad
 
-- Las credenciales de entorno (`EPS_CHAT_ID`, Chat IDs de alerta, etc.) viven exclusivamente en `.env`, **nunca en el codigo fuente**
-- Los datos del paciente (`idNumber`, `idType`, `birthdate`) se pasan como argumentos CLI — no se almacenan en archivos
+- Las credenciales viven en `.env` o en el `config.json` global (`~/.config/renuevamedicamentos-inador/config.json`), **nunca en el codigo fuente**
+- Los datos del paciente (`idNumber`, `idType`, `birthdate`) se pueden pasar como argumentos CLI o almacenar en el `config.json` global mediante `init`
 - `.env` esta incluido en `.gitignore` — no se sube al repositorio
-- Los logs usan funciones de masking para no exponer datos sensibles:
+- El `config.json` global vive fuera del proyecto (en la ruta XDG del usuario), asi que no se sube al repositorio
+- Los logs usan funciones de masking (`src/utils/masking.ts`) para no exponer datos sensibles:
   - `maskPhone()`: `573175180237@c.us` &rarr; `5731***0237@c.us`
   - `maskIdNumber()`: `1234567890` &rarr; `123***7890`
 - `.env.example` sirve como plantilla segura con valores de ejemplo
