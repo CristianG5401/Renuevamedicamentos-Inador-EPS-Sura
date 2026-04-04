@@ -1,13 +1,13 @@
 /**
- * Utility functions for masking sensitive data in logs.
- * Pure functions with no external dependencies.
+ * Funciones utilitarias para enmascarar datos sensibles en logs.
+ * Funciones puras sin dependencias externas.
  */
 
 /**
- * Masks a WhatsApp chat ID for safe logging.
- * Example: "573175180237@c.us" → "5731***0237@c.us"
- * @param chatId - The full chat ID (e.g., "573175180237@c.us")
- * @returns The masked chat ID
+ * Enmascara un chat ID de WhatsApp para logueo seguro.
+ * Ejemplo: "573175180237@c.us" → "5731***0237@c.us"
+ * @param chatId - El chat ID completo (ej: "573175180237@c.us")
+ * @returns El chat ID enmascarado
  */
 export function maskPhone(chatId: string): string {
   const [number, suffix] = chatId.split("@");
@@ -21,10 +21,10 @@ export function maskPhone(chatId: string): string {
 }
 
 /**
- * Masks a document number for safe logging.
- * Example: "1234567890" → "123***7890"
- * @param idNumber - The full document number
- * @returns The masked document number
+ * Enmascara un número de documento para logueo seguro.
+ * Ejemplo: "1234567890" → "123***7890"
+ * @param idNumber - El número de documento completo
+ * @returns El número de documento enmascarado
  */
 export function maskIdNumber(idNumber: string): string {
   if (idNumber.length <= 6) return "***";

@@ -7,8 +7,8 @@ import { getConfigFilePath } from "../config/paths";
 import type { ValidatedConfig } from "../config/types";
 
 /**
- * Prompts the user for a text value, returning undefined if cancelled (Ctrl+C).
- * Centralizes the cancel-check pattern to avoid repetition.
+ * Solicita un valor de texto al usuario, retornando undefined si cancela (Ctrl+C).
+ * Centraliza el patrón de chequeo de cancelación para evitar repetición.
  */
 async function promptText(
   message: string,
@@ -28,7 +28,7 @@ export const initCommand = defineCommand({
   meta: {
     name: "init",
     description:
-      "Creates or updates the global config file (~/.config/renuevamedicamentos-inador/config.json)",
+      "Crea o actualiza el archivo de configuración global (~/.config/renuevamedicamentos-inador/config.json)",
   },
   run: async () => {
     const configPath = getConfigFilePath();
