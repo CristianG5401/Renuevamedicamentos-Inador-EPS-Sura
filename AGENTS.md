@@ -1,0 +1,1 @@
+/home/cvalen/syncthing-folders/Code_Personal/Typescript/bot-renuevamedicamentos-inador-eps/CLAUDE.md

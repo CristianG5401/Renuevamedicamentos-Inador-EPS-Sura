@@ -1,28 +1,28 @@
+/**
+ * Coordinador del comando interactivo `init`.
+ *
+ * Este archivo define el flujo principal: muestra el contexto inicial,
+ * solicita los datos al usuario, decide cuándo enseñar ayudas inline
+ * y delega la persistencia de la configuración final. No contiene helpers
+ * reutilizables de prompts ni de renderizado; esos viven en sus módulos vecinos.
+ */
+
 import { defineCommand } from "citty";
 import consola from "consola";
 
-import { ID_TYPES_ARRAY } from "../domain/constants";
-import { loadGlobalConfig, writeGlobalConfig } from "../config/global-store";
-import { getConfigFilePath } from "../config/paths";
-import type { ValidatedConfig } from "../config/types";
-
-/**
- * Solicita un valor de texto al usuario, retornando undefined si cancela (Ctrl+C).
- * Centraliza el patrón de chequeo de cancelación para evitar repetición.
- */
-async function promptText(
-  message: string,
-  placeholder?: string,
-): Promise<string | undefined> {
-  const result = await consola.prompt(message, {
-    type: "text",
-    placeholder,
-  });
-
-  if (typeof result === "symbol") return undefined;
-
-  return result;
-}
+import {
+  loadGlobalConfig,
+  writeGlobalConfig,
+} from "../../../config/global-store";
+import { getConfigFilePath } from "../../../config/paths";
+import type { ValidatedConfig } from "../../../config/types";
+import { ID_TYPES_ARRAY } from "../../../domain/constants";
+import {
+  showExistingConfig,
+  showFieldHint,
+  showWelcomeBanner,
+} from "./presentation";
+import { promptText } from "./prompts";
 
 export const initCommand = defineCommand({
   meta: {
@@ -32,11 +32,16 @@ export const initCommand = defineCommand({
   },
   run: async () => {
     const configPath = getConfigFilePath();
+    showWelcomeBanner(configPath);
+
     const existingConfig = await loadGlobalConfig();
 
     if (existingConfig) {
+      consola.info("Ya existe una configuración guardada:");
+      showExistingConfig(existingConfig);
+
       const shouldOverwrite = await consola.prompt(
-        `Ya existe un archivo de configuración en ${configPath}. ¿Deseas sobreescribirlo?`,
+        `¿Deseas sobreescribir el archivo en ${configPath}?`,
         { type: "confirm", initial: false },
       );
       if (typeof shouldOverwrite === "symbol" || !shouldOverwrite) {
@@ -44,8 +49,6 @@ export const initCommand = defineCommand({
         return;
       }
     }
-
-    // --- Prompts ---
 
     const idType = await consola.prompt("Tipo de documento:", {
       type: "select",
@@ -56,38 +59,42 @@ export const initCommand = defineCommand({
     const idNumber = await promptText("Número de documento:", "1234567890");
     if (!idNumber) return;
 
+    showFieldHint("birthdate");
     const birthdate = await promptText("Fecha de nacimiento:", "DD/MM/AAAA");
     if (!birthdate) return;
 
+    showFieldHint("epsChatId");
     const epsChatId = await promptText(
       "Chat ID de la EPS en WhatsApp:",
       "57XXXXXXXXXX@c.us",
     );
     if (!epsChatId) return;
 
+    showFieldHint("userToAlertChatId");
     const userToAlertChatId = await promptText(
       "Chat ID donde enviar alertas de resultado:",
       "57XXXXXXXXXX@c.us",
     );
     if (!userToAlertChatId) return;
 
+    showFieldHint("successAlertMessage");
     const successAlertMessage = await promptText(
       "Mensaje cuando el proceso se completa exitosamente:",
     );
     if (!successAlertMessage) return;
 
+    showFieldHint("nothingToRenewAlertMessage");
     const nothingToRenewAlertMessage = await promptText(
       "Mensaje cuando no hay medicamentos por renovar:",
     );
     if (!nothingToRenewAlertMessage) return;
 
+    showFieldHint("techAlertChatId");
     const techAlertChatId = await promptText(
       "Chat ID donde enviar alertas/errores técnicos:",
       "57XXXXXXXXXX@c.us",
     );
     if (!techAlertChatId) return;
-
-    // --- Write ---
 
     const config: ValidatedConfig = {
       idType,
@@ -101,6 +108,9 @@ export const initCommand = defineCommand({
     };
 
     const writtenPath = await writeGlobalConfig(config);
-    consola.success(`Configuración guardada en ${writtenPath}`);
+    consola.success(
+      `Configuración guardada en ${writtenPath}\n` +
+        "Siguiente paso: usa el comando `renew` para iniciar la renovación.",
+    );
   },
 });

@@ -1,13 +1,9 @@
 import { defineCommand } from "citty";
 
-// Constantes
-import { ID_TYPES_ARRAY } from "../domain/constants";
-// Configuración
-import { resolveConfig } from "../config/resolve";
-// Adapter
-import { WhatsAppWebJsAdapter } from "../adapters/whatsappWebJs";
-// Bot
-import { startRenewal } from "../orchestrator";
+import { WhatsAppWebJsAdapter } from "../../../adapters/whatsappWebJs";
+import { resolveConfig } from "../../../config/resolve";
+import { ID_TYPES_ARRAY } from "../../../domain/constants";
+import { startRenewal } from "../../../orchestrator";
 
 export const renewCommand = defineCommand({
   meta: {

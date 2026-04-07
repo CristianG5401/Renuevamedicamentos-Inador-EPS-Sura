@@ -120,9 +120,15 @@ Si no se proporcionan, toman el valor de la variable de entorno correspondiente 
 ```txt
 renuevamedicamentos-inador/
 ├── src/
-│   ├── commands/                       # Subcomandos de la CLI (citty)
-│   │   ├── renew.ts                   # Comando "renew": renueva medicamentos de una persona
-│   │   └── init.ts                    # Comando "init": crea config.json interactivamente
+│   ├── cli/                           # Capa de entrada CLI (citty + consola)
+│   │   ├── main.ts                    # Composicion principal de la CLI y registro de subcomandos
+│   │   └── commands/
+│   │       ├── init/
+│   │       │   ├── command.ts         # Comando "init": coordina el flujo interactivo
+│   │       │   ├── prompts.ts         # Helpers de prompts y cancelacion
+│   │       │   └── presentation.ts    # Banner, hints y preview enmascarado
+│   │       └── renew/
+│   │           └── command.ts         # Comando "renew": resuelve config y arranca el bot
 │   ├── config/                         # Configuracion: resolucion, persistencia y rutas XDG
 │   │   ├── types.ts                   # Interfaz ValidatedConfig (fuente de verdad de tipos)
 │   │   ├── resolve.ts                 # Merge de config: CLI args > .env > config.json global
@@ -144,7 +150,7 @@ renuevamedicamentos-inador/
 │   ├── utils/                          # Utilidades compartidas
 │   │   └── masking.ts                 # Funciones de masking para datos sensibles en logs
 │   ├── orchestrator.ts                 # Orquestacion: configura actor, conecta WhatsApp y maneja ciclo de vida
-│   └── cli.ts                          # Entry point: define la CLI con citty y registra subcomandos
+│   └── cli.ts                          # Entry point delgado: delega en src/cli/main.ts
 ├── docs/
 │   ├── renewMedsMachine-playground.html   # Playground interactivo
 │   └── sample-data/                       # Datos de ejemplo de mensajes de la EPS
@@ -285,7 +291,7 @@ Cada guard valida que el mensaje recibido del bot coincida con el paso esperado 
 La maquina declara un servicio `sendMessageService` con una implementacion por defecto que lanza error. La implementacion real se inyecta en dos pasos mediante el patron **Port/Adapter**:
 
 ```typescript
-// commands/renew.ts — el CLI (driving adapter) instancia el adapter concreto
+// cli/commands/renew/command.ts — el CLI (driving adapter) instancia el adapter concreto
 const config = resolveConfig(args);
 const whatsapp = new WhatsAppWebJsAdapter();
 await startRenewal(config, whatsapp);
