@@ -2,7 +2,118 @@
 
 Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en la EPS para mi mamá y mi papá. El proceso manual es repetitivo y me da mucha locha hacerlo (Las EPS son 💩). Aprovechando el envión, decidí aprender sobre **máquinas de estado** con XState, por eso tal vez el código puede pecar de sobreingeniería, pero la idea es aprender. Aunque es un poco tedioso acoplarse al modelo de máquinas de estado, me parece que el resultado es fácil de documentar y termina siendo bastante claro.
 
+`renuevamedicamentos-inador` automatiza el flujo de renovación mensual de medicamentos en la EPS SURA usando WhatsApp. La experiencia principal del proyecto es una CLI: primero configuras tus datos con `init` y después ejecutas `renew` cada vez que necesites lanzar el proceso.
+
 > Intenta jugar un poco con el [playground interactivo](#playground-interactivo) en la carpeta `docs/`.
+
+## Flujo recomendado
+
+1. Ejecuta `renuevamedicamentos-inador init` para guardar tu configuración.
+2. Ejecuta `renuevamedicamentos-inador renew` para iniciar la renovación.
+
+## Requisitos
+
+- La CLI `renuevamedicamentos-inador` ya instalada y disponible en tu `PATH`
+- **WhatsApp** con una sesion activa (para escanear el QR la primera vez)
+- El **Chat ID** del bot de la EPS (formato: `57XXXXXXXXXX@c.us`)
+- Los datos del paciente: **numero de cedula**, **tipo de documento** y **fecha de nacimiento**
+- Un **Chat ID de destino** para recibir alertas del resultado de la renovacion
+
+## Uso
+
+> Los ejemplos de esta seccion asumen que la CLI ya esta instalada. Si la ejecutas desde este repositorio durante desarrollo, reemplaza `renuevamedicamentos-inador` por `bun run start`.
+
+### Comando `init`
+
+Crea o actualiza el archivo de configuracion global de forma interactiva:
+
+```bash
+renuevamedicamentos-inador init
+```
+
+Durante el flujo:
+
+- Muestra un banner de bienvenida con la ruta exacta del `config.json`
+- Si ya existe una configuracion, enseña una vista previa enmascarada antes de preguntar si deseas sobreescribirla
+- Pide los datos del paciente, los Chat IDs y los mensajes de alerta
+- Guarda la configuracion global y te indica que el siguiente paso es usar `renew`
+
+Por defecto, el archivo se guarda en `~/.config/renuevamedicamentos-inador/config.json` siguiendo la convención XDG. Si `XDG_CONFIG_HOME` está definido, se usa esa ruta.
+
+### Comando `renew`
+
+Si ya configuraste tus datos con `init`, el camino mas corto es:
+
+```bash
+renuevamedicamentos-inador renew
+```
+
+Si quieres sobreescribir valores para una ejecucion puntual, puedes pasarlos por CLI:
+
+```bash
+renuevamedicamentos-inador renew \
+  --idType "Cédula de ciudadanía" \
+  --idNumber "1234567890" \
+  --birthdate "01/01/1990"
+```
+
+### Prioridad de configuracion
+
+Cuando ejecutas `renew`, la configuracion final se resuelve con esta prioridad:
+
+1. **Argumentos CLI**
+   Valores pasados directamente al ejecutar `renuevamedicamentos-inador renew ...`
+2. **Variables de entorno**
+   Valores presentes en `.env` o en `process.env`
+3. **`config.json` global**
+   Archivo guardado por `init` en la ruta XDG del usuario
+
+Si un valor existe en multiples fuentes, gana la de mayor prioridad.
+
+Orden real de lectura por tipo de valor:
+
+- `idType`, `idNumber`, `birthdate`, `userToAlertChatId`, `successAlertMessage`, `nothingToRenewAlertMessage`, `techAlertChatId`
+  CLI -> `.env` / `process.env` -> `config.json` global
+- `epsChatId`
+  `.env` / `process.env` -> `config.json` global
+
+`epsChatId` es la unica excepcion importante: no se expone como argumento CLI.
+
+### Opciones disponibles en `renew`
+
+| Opcion | Descripcion | Fuentes posibles |
+| --- | --- | --- |
+| `--idType` | Tipo de documento del paciente | CLI / `.env` / config global |
+| `--idNumber` | Numero de documento del paciente | CLI / `.env` / config global |
+| `--birthdate` | Fecha de nacimiento en formato `DD/MM/AAAA` | CLI / `.env` / config global |
+| `--userToAlertChatId` | Chat ID donde enviar alertas de resultado | CLI / `.env` / config global |
+| `--successAlertMessage` | Mensaje cuando el proceso termina exitosamente | CLI / `.env` / config global |
+| `--nothingToRenewAlertMessage` | Mensaje cuando no hay medicamentos por renovar | CLI / `.env` / config global |
+| `--techAlertChatId` | Chat ID donde enviar alertas tecnicas | CLI / `.env` / config global |
+
+> Para ver todas las opciones disponibles: `renuevamedicamentos-inador renew --help`
+
+## Desarrollo local
+
+Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y ejecutar la CLI localmente.
+
+### Setup del repo
+
+1. Instala las dependencias:
+
+    ```bash
+    bun install
+    ```
+
+2. Ejecuta la CLI local:
+
+    ```bash
+    bun run start --help
+    bun run start init
+    bun run start renew --help
+    ```
+
+3. Si prefieres usar variables de entorno para desarrollo local, crea `.env` a partir de `.env.example` y completa tus datos reales.
 
 ## Tech Stack
 
@@ -15,96 +126,6 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 | [citty](https://github.com/unjs/citty) | 0.2 | Framework CLI para subcomandos y parsing de argumentos |
 | [consola](https://github.com/unjs/consola) | 3.4 | Logger estructurado para la CLI |
 | [Biome](https://biomejs.dev) | 2.4 | Linter y formatter |
-
-## Prerequisitos
-
-- **Bun** instalado ([instrucciones](https://bun.sh/docs/installation))
-- **WhatsApp** con una sesion activa (para escanear el QR la primera vez)
-- El **Chat ID** del bot de la EPS (formato: `57XXXXXXXXXX@c.us`)
-- Los datos del paciente: **numero de cedula**, **tipo de documento** y **fecha de nacimiento** (se pasan como argumentos CLI)
-- Un **Chat ID de destino** para recibir alertas del resultado de la renovacion
-
-## Setup
-
-1. Instala las dependencias:
-
-    ```bash
-    bun install
-    ```
-
-2. Configura tus datos. Hay dos opciones:
-
-    **Opcion A: Configuracion interactiva (recomendada)**
-
-    ```bash
-    bun run start init
-    ```
-
-    Esto lanza un asistente interactivo que crea el archivo de configuracion global en `~/.config/renuevamedicamentos-inador/config.json` ([XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/latest/)).
-
-    **Opcion B: Variables de entorno**
-
-    ```bash
-    cp .env.example .env
-    ```
-
-    Edita `.env` con tus datos reales:
-
-    ```env
-    EPS_CHAT_ID=57XXXXXXXXXX@c.us                      # Chat ID del bot de la EPS en WhatsApp
-    USER_TO_ALERT_CHAT_ID=57XXXXXXXXXX@c.us             # Chat ID donde enviar alertas de resultado
-    SUCCESS_ALERT_MESSAGE=Tu mensaje de alerta aquí     # Mensaje cuando la renovacion es exitosa
-    NOTHING_TO_RENEW_ALERT_MESSAGE=Tu mensaje aquí      # Mensaje cuando no hay medicamentos por renovar
-    TECH_ALERT_CHAT_ID=57XXXXXXXXXX@c.us                # Chat ID para alertas de errores tecnicos
-    ```
-
-    > **Prioridad de configuracion:** CLI args > `.env` (en cwd) > `config.json` (XDG global). Si un valor esta definido en multiples fuentes, gana la de mayor prioridad.
-
-## Uso
-
-El proyecto es una CLI con subcomandos.
-
-### Comando `init`
-
-Crea o actualiza el archivo de configuracion global de forma interactiva:
-
-```bash
-bun run start init
-```
-
-El asistente te pide cada dato (tipo de documento, numero, fecha de nacimiento, Chat IDs, mensajes de alerta) y guarda la configuracion en `~/.config/renuevamedicamentos-inador/config.json`. Si ya existe un archivo de configuracion, pregunta si deseas sobreescribirlo.
-
-### Comando `renew`
-
-Renueva los medicamentos de una persona:
-
-```bash
-bun run start renew \
-  --idType "Cédula de ciudadanía" \
-  --idNumber "1234567890" \
-  --birthdate "01/01/1990"
-```
-
-### Argumentos requeridos
-
-| Argumento | Descripcion |
-| --- | --- |
-| `--idType` | Tipo de documento (ej: `"Cédula de ciudadanía"`, `"Pasaporte"`, etc.) |
-| `--idNumber` | Numero de documento de la persona |
-| `--birthdate` | Fecha de nacimiento en formato `DD/MM/AAAA` |
-
-### Argumentos opcionales
-
-Si no se proporcionan, toman el valor de la variable de entorno correspondiente en `.env`:
-
-| Argumento | Default (env var) | Descripcion |
-| --- | --- | --- |
-| `--userToAlertChatId` | `USER_TO_ALERT_CHAT_ID` | Chat ID donde enviar alertas de resultado |
-| `--successAlertMessage` | `SUCCESS_ALERT_MESSAGE` | Mensaje al completar exitosamente |
-| `--nothingToRenewAlertMessage` | `NOTHING_TO_RENEW_ALERT_MESSAGE` | Mensaje cuando no hay medicamentos por renovar |
-| `--techAlertChatId` | `TECH_ALERT_CHAT_ID` | Chat ID para alertas de errores tecnicos |
-
-> Para ver todos los argumentos disponibles: `bun run start renew --help`
 
 ## Scripts
 
@@ -129,11 +150,11 @@ renuevamedicamentos-inador/
 │   │       │   └── presentation.ts    # Banner, hints y preview enmascarado
 │   │       └── renew/
 │   │           └── command.ts         # Comando "renew": resuelve config y arranca el bot
-│   ├── config/                         # Configuracion: resolucion, persistencia y rutas XDG
-│   │   ├── types.ts                   # Interfaz ValidatedConfig (fuente de verdad de tipos)
-│   │   ├── resolve.ts                 # Merge de config: CLI args > .env > config.json global
-│   │   ├── global-store.ts            # Lectura/escritura del config.json en ruta XDG
-│   │   └── paths.ts                   # Resolucion de rutas XDG (~/.config/<app>/config.json)
+│   ├── config/                         # Configuracion: tipos, resolucion, persistencia y rutas XDG
+│   │   ├── types.ts                   # Tipo ValidatedConfig compartido entre CLI y orquestacion
+│   │   ├── resolve.ts                 # Resuelve config final: CLI args > .env > config.json global
+│   │   ├── global-store.ts            # Lectura/escritura del config.json global
+│   │   └── paths.ts                   # Ruta XDG del config.json de la aplicacion
 │   ├── domain/                         # Logica de negocio pura (sin dependencias externas)
 │   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
 │   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado
@@ -193,20 +214,20 @@ stateDiagram-v2
     WAITING_FOR_PROCS_AND_MEDS_MENU --> SENDING_SELECTED_PROCS_AND_MEDS : [checkProcsAndMedsMenu]
 
     state "Procedimiento y formula" as proc_section
-    SENDING_SELECTED_PROCS_AND_MEDS --> WAITING_FOR_PROCEDURES_MESSAGE
-    WAITING_FOR_PROCEDURES_MESSAGE --> SENDING_SELECTED_PROCEDURE : [checkChatMessage]
-    SENDING_SELECTED_PROCEDURE --> WAITING_FOR_PRESCRIPTION_WARNING
-    WAITING_FOR_PRESCRIPTION_WARNING --> WAITING_FOR_BIRTHDATE_INPUT : [checkChatMessage]
-    WAITING_FOR_BIRTHDATE_INPUT --> SENDING_BIRTHDATE : [checkChatMessage]
+    SENDING_SELECTED_PROCS_AND_MEDS_OPTION --> WAITING_FOR_PROCEDURES_MESSAGE
+    WAITING_FOR_PROCEDURES_MESSAGE --> SENDING_SELECTED_PROCEDURE_OPTION : [checkChatMessage]
+    SENDING_SELECTED_PROCEDURE_OPTION --> WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING
+    WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING --> WAITING_FOR_BIRTHDATE_INPUT_MESSAGE : [checkChatMessage]
+    WAITING_FOR_BIRTHDATE_INPUT_MESSAGE --> SENDING_BIRTHDATE : [checkChatMessage]
 
     state "Resultado" as result_section
-    SENDING_BIRTHDATE --> WAITING_FOR_CONFIRMATION
-    WAITING_FOR_CONFIRMATION --> WAITING_FOR_RENEWAL_RESULT : [checkChatMessage]
-    WAITING_FOR_RENEWAL_RESULT --> SENDING_SUCCESS_ALERT : Renovacion exitosa
-    WAITING_FOR_RENEWAL_RESULT --> SENDING_NOTHING_TO_RENEW : No es fecha de renovacion
+    SENDING_BIRTHDATE --> WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL
+    WAITING_FOR_CONFIRMATION_OF_PRESCRIPTION_RENEWAL --> WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS : [checkChatMessage]
+    WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS --> SENDING_SUCCESS_MESSAGE_ALERT : Renovacion exitosa
+    WAITING_FOR_PRESCRIPTION_RENEWAL_SUCCESS --> SENDING_NOTHING_TO_RENEW_MESSAGE : No es fecha de renovacion
 
-    SENDING_SUCCESS_ALERT --> COMPLETED
-    SENDING_NOTHING_TO_RENEW --> COMPLETED
+    SENDING_SUCCESS_MESSAGE_ALERT --> COMPLETED
+    SENDING_NOTHING_TO_RENEW_MESSAGE --> COMPLETED
     COMPLETED --> [*]
 ```
 
@@ -235,9 +256,9 @@ Los estados siguen un patron de pares: un estado `WAITING_FOR_*` espera un mensa
 | Estado | Que hace |
 | --- | --- |
 | `WAITING_FOR_ID_TYPE_LIST` | Espera la lista de tipos de documento (cedula, pasaporte, etc.) |
-| `SENDING_ID_TYPE` | Envia el tipo de documento proporcionado via CLI (`--idType`) |
+| `SENDING_ID_TYPE` | Envia el tipo de documento resuelto desde la configuracion final |
 | `WAITING_FOR_ID_NUMBER_INPUT_MESSAGE` | Espera el prompt para ingresar el numero de documento |
-| `SENDING_ID_NUMBER` | Envia el numero de documento proporcionado via CLI (`--idNumber`) |
+| `SENDING_ID_NUMBER` | Envia el numero de documento resuelto desde la configuracion final |
 
 **Seleccion de servicio**
 
@@ -256,7 +277,7 @@ Los estados siguen un patron de pares: un estado `WAITING_FOR_*` espera un mensa
 | `SENDING_SELECTED_PROCEDURE_OPTION` | Envia "3" (renovacion mensual de formula de medicamentos) |
 | `WAITING_FOR_ACTIVE_PRESCRIPTION_WARNING` | Espera el aviso sobre formulas vigentes |
 | `WAITING_FOR_BIRTHDATE_INPUT_MESSAGE` | Espera el prompt para ingresar la fecha de nacimiento |
-| `SENDING_BIRTHDATE` | Envia la fecha de nacimiento proporcionada via CLI (`--birthdate`) |
+| `SENDING_BIRTHDATE` | Envia la fecha de nacimiento resuelta desde la configuracion final |
 
 **Resultado**
 
@@ -281,7 +302,7 @@ Cada guard valida que el mensaje recibido del bot coincida con el paso esperado 
 | --- | --- |
 | `checkTermAndConditionsMenu` | Que el mensaje contenga el texto de bienvenida y que el primer boton sea "Acepto" |
 | `checkAbsenceOfTermAndConditionsMenu` | Camino alternativo: el bot saluda sin mostrar botones de T&C (ya fueron aceptados previamente) |
-| `checkIdTypeList` | Que la lista de tipos de documento contenga el tipo proporcionado via CLI (`--idType`) |
+| `checkIdTypeList` | Que la lista de tipos de documento contenga el tipo resuelto desde la configuracion final |
 | `checkChatMessage` | Guard generico: valida que el texto del mensaje contenga una subcadena esperada (reutilizado en varios estados) |
 | `checkEpsServicesList` | Que la lista de servicios contenga "Tramites y Medicamentos" |
 | `checkProcsAndMedsMenu` | Que el menu de respuesta contenga el boton "Tramites" |
