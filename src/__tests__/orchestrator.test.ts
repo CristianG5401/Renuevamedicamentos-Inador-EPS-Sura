@@ -1,7 +1,7 @@
 import { describe, it, expect, mock } from "bun:test";
 import { startRenewal, createActorObserver } from "../orchestrator";
 import { createMockWhatsAppPort } from "./mocks/mockWhatsAppPort";
-import type { ValidatedConfig } from "../config";
+import type { ValidatedConfig } from "../application/config/types";
 
 const VALID_CONFIG: ValidatedConfig = {
   idType: "Cédula de ciudadanía",

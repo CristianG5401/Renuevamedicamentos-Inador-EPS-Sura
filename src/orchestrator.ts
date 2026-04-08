@@ -3,7 +3,7 @@ import { consola } from "consola";
 import { createActor } from "xstate";
 
 // Tipos
-import type { ValidatedConfig } from "./config";
+import type { ValidatedConfig } from "./application/config/types";
 import type { WhatsAppPort } from "./ports/whatsappPort";
 // Máquina de estados
 import { EVENTS, renewMedsMachine } from "./domain/renewMedsMachine";
@@ -12,7 +12,7 @@ import { parseEpsMessage } from "./ports/mappers/parseMessage";
 // Servicios
 import { createActorServices } from "./services/actorServices";
 // Utils
-import { maskPhone } from "./config";
+import { maskPhone } from "./utils/masking";
 
 //TODO: Usar path alias para las importaciones
 
@@ -34,9 +34,7 @@ export function createActorObserver(
     },
     async complete() {
       try {
-        consola.success(
-          "Máquina finalizada, cerrando cliente de WhatsApp...",
-        );
+        consola.success("Máquina finalizada, cerrando cliente de WhatsApp...");
         await whatsapp.destroy();
         consola.info("Cliente de WhatsApp cerrado");
         resolve();

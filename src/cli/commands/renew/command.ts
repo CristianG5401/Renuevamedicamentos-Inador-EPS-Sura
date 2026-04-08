@@ -1,13 +1,9 @@
 import { defineCommand } from "citty";
 
-// Constantes
-import { ID_TYPES_ARRAY } from "../domain/constants";
-// Configuración
-import { resolveConfig } from "../config";
-// Adapter
-import { WhatsAppWebJsAdapter } from "../adapters/whatsappWebJs";
-// Bot
-import { startRenewal } from "../orchestrator";
+import { WhatsAppWebJsAdapter } from "../../../adapters/whatsappWebJs";
+import { resolveConfig } from "../../../application/config/resolveConfig";
+import { ID_TYPES_ARRAY } from "../../../domain/constants";
+import { startRenewal } from "../../../orchestrator";
 
 export const renewCommand = defineCommand({
   meta: {
@@ -51,7 +47,7 @@ export const renewCommand = defineCommand({
     },
   },
   run: async ({ args }) => {
-    const config = resolveConfig(args);
+    const config = await resolveConfig(args);
     const whatsapp = new WhatsAppWebJsAdapter();
 
     await startRenewal(config, whatsapp);

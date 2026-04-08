@@ -1,19 +1,5 @@
-import { defineCommand, runMain } from "citty";
+import { runMain } from "citty";
 
-// Comandos
-import { renewCommand } from "./commands/renew";
-// Metadata
-import pkg from "../package.json";
+import { mainCommand } from "./cli/main";
 
-const main = defineCommand({
-  meta: {
-    name: pkg.name,
-    version: pkg.version,
-    description: "Bot para automatizar la renovación de medicamentos en SURA",
-  },
-  subCommands: {
-    renew: renewCommand,
-  },
-});
-
-runMain(main);
+runMain(mainCommand);
