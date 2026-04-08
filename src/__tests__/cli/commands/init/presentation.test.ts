@@ -5,7 +5,7 @@ import {
   showFieldHint,
   showWelcomeBanner,
 } from "../../../../cli/commands/init/presentation";
-import type { ValidatedConfig } from "../../../../config/types";
+import type { ValidatedConfig } from "../../../../application/config/types";
 
 // Restaura los spies después de cada test para que no contaminen el siguiente,
 // incluso si un caso falla antes de terminar. Se centraliza aquí para que

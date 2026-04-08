@@ -7,7 +7,7 @@
 
 import { join } from "node:path";
 import { homedir } from "node:os";
-import pkg from "../../package.json";
+import pkg from "../../../package.json";
 
 /** Extrae el nombre del binario de package.json o lanza error si no existe. */
 function resolveBinName(): string {

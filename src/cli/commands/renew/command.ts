@@ -1,7 +1,7 @@
 import { defineCommand } from "citty";
 
 import { WhatsAppWebJsAdapter } from "../../../adapters/whatsappWebJs";
-import { resolveConfig } from "../../../config/resolve";
+import { resolveConfig } from "../../../application/config/resolveConfig";
 import { ID_TYPES_ARRAY } from "../../../domain/constants";
 import { startRenewal } from "../../../orchestrator";
 

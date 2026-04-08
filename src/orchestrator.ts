@@ -3,7 +3,7 @@ import { consola } from "consola";
 import { createActor } from "xstate";
 
 // Tipos
-import type { ValidatedConfig } from "./config/resolve";
+import type { ValidatedConfig } from "./application/config/types";
 import type { WhatsAppPort } from "./ports/whatsappPort";
 // Máquina de estados
 import { EVENTS, renewMedsMachine } from "./domain/renewMedsMachine";

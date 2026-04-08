@@ -8,7 +8,7 @@
  */
 
 import consola from "consola";
-import type { ValidatedConfig } from "../../../config/types";
+import type { ValidatedConfig } from "../../../application/config/types";
 import { maskIdNumber, maskPhone } from "../../../utils/masking";
 
 function isNonEmptyString(value: unknown): value is string {

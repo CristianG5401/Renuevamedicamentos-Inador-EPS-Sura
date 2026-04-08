@@ -4,7 +4,7 @@
  */
 
 import { mkdir } from "node:fs/promises";
-import type { ValidatedConfig } from "./types";
+import type { ValidatedConfig } from "../../application/config/types";
 import { getConfigDir, getConfigFilePath } from "./paths";
 
 /**

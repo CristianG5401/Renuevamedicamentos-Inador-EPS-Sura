@@ -6,10 +6,8 @@
  * Prioridad: CLI args (mayor) → process.env (.env en cwd) → config.json (XDG global) → error.
  */
 
-import { loadGlobalConfig } from "./global-store";
+import { loadGlobalConfig } from "../../infrastructure/config/global-store";
 import type { ValidatedConfig } from "./types";
-
-export type { ValidatedConfig } from "./types";
 
 /** Valores sobreescribibles desde argumentos CLI (datos del usuario). */
 export type CliOverrides = Partial<Omit<ValidatedConfig, "epsChatId">>;

@@ -150,11 +150,14 @@ renuevamedicamentos-inador/
 │   │       │   └── presentation.ts    # Banner, hints y preview enmascarado
 │   │       └── renew/
 │   │           └── command.ts         # Comando "renew": resuelve config y arranca el bot
-│   ├── config/                         # Configuracion: tipos, resolucion, persistencia y rutas XDG
-│   │   ├── types.ts                   # Tipo ValidatedConfig compartido entre CLI y orquestacion
-│   │   ├── resolve.ts                 # Resuelve config final: CLI args > .env > config.json global
-│   │   ├── global-store.ts            # Lectura/escritura del config.json global
-│   │   └── paths.ts                   # Ruta XDG del config.json de la aplicacion
+│   ├── application/
+│   │   └── config/                    # Politica de config usada por la aplicacion
+│   │       ├── types.ts              # Tipo ValidatedConfig compartido entre CLI y orquestacion
+│   │       └── resolveConfig.ts      # Resuelve config final: CLI args > .env > config.json global
+│   ├── infrastructure/
+│   │   └── config/                    # Detalles de filesystem y rutas XDG
+│   │       ├── global-store.ts       # Lectura/escritura del config.json global
+│   │       └── paths.ts              # Ruta XDG del config.json de la aplicacion
 │   ├── domain/                         # Logica de negocio pura (sin dependencias externas)
 │   │   ├── renewMedsMachine.ts         # Definicion de la maquina de estados (XState)
 │   │   ├── guards.ts                   # Guards (validaciones) para las transiciones de estado

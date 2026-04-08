@@ -47,3 +47,4 @@ opensrc/
 
 # Superpowers skill
 /docs/superpowers/
+.worktrees/

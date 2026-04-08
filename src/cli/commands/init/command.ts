@@ -13,9 +13,9 @@ import consola from "consola";
 import {
   loadGlobalConfig,
   writeGlobalConfig,
-} from "../../../config/global-store";
-import { getConfigFilePath } from "../../../config/paths";
-import type { ValidatedConfig } from "../../../config/types";
+} from "../../../infrastructure/config/global-store";
+import { getConfigFilePath } from "../../../infrastructure/config/paths";
+import type { ValidatedConfig } from "../../../application/config/types";
 import { ID_TYPES_ARRAY } from "../../../domain/constants";
 import {
   showExistingConfig,
