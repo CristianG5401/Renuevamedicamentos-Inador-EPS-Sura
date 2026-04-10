@@ -1,13 +1,22 @@
 {
-  "name": "bot-renuevamedicamentos-inador-eps",
+  "name": "renuevamedicamentos-inador",
   "version": "1.0.0",
-  "module": "src/cli.ts",
   "type": "module",
-  "private": true,
   "bin": {
-    "renuevamedicamentos-inador": "./src/cli.ts"
+    "renuevamedicamentos-inador": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
+    "build": "bun run bundle.ts",
+    "prepublishOnly": "bun run build",
+    "pack:dry-run": "bun pm pack --dry-run",
     "start": "bun run src/cli.ts",
     "start:watch": "bun --watch src/cli.ts",
     "format:changed": "git diff --name-only HEAD --relative -- . | xargs -r biome format --write",
@@ -16,9 +25,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
     "@types/bun": "1.3.9",
-    "@types/qrcode-terminal": "0.12.2"
-  },
-  "peerDependencies": {
+    "@types/qrcode-terminal": "0.12.2",
     "typescript": "5"
   },
   "dependencies": {

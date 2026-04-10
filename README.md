@@ -19,6 +19,31 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 - Los datos del paciente: **numero de cedula**, **tipo de documento** y **fecha de nacimiento**
 - Un **Chat ID de destino** para recibir alertas del resultado de la renovacion
 
+## Instalacion
+
+### Instalar globalmente con Bun
+
+```bash
+bun add -g renuevamedicamentos-inador
+```
+
+### Ejecutar sin instalar globalmente
+
+```bash
+bunx renuevamedicamentos-inador --help
+```
+
+### Agregarla a otro proyecto
+
+```bash
+bun add renuevamedicamentos-inador
+bun install
+```
+
+`bun install` solo instala dependencias ya declaradas en el `package.json` del proyecto. Para agregar esta CLI por primera vez, usa `bun add`.
+
+> La instalacion puede ser pesada porque `whatsapp-web.js` depende de Puppeteer. El paquete publicado queda liviano, pero la primera instalacion descarga esas dependencias de runtime.
+
 ## Uso
 
 > Los ejemplos de esta seccion asumen que la CLI ya esta instalada. Si la ejecutas desde este repositorio durante desarrollo, reemplaza `renuevamedicamentos-inador` por `bun run start`.
@@ -111,9 +136,48 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
     bun run start --help
     bun run start init
     bun run start renew --help
+    bun run build
     ```
 
 3. Si prefieres usar variables de entorno para desarrollo local, crea `.env` a partir de `.env.example` y completa tus datos reales.
+
+## Publicar en npm
+
+1. Autentícate en npm:
+
+    ```bash
+    bunx npm login
+    ```
+
+2. Sube la versión antes de publicar:
+
+    ```bash
+    bun pm version patch
+    ```
+
+3. Ejecuta la verificación local:
+
+    ```bash
+    bun test
+    bun run build
+    bun run pack:dry-run
+    ```
+
+4. Publica el paquete:
+
+    ```bash
+    bun publish
+    ```
+
+5. Valida la publicación:
+
+    ```bash
+    bunx renuevamedicamentos-inador --help
+    bun add -g renuevamedicamentos-inador
+    renuevamedicamentos-inador --help
+    ```
+
+Para troubleshooting, 2FA/tokens, guardrails de versionado y el flujo explicado paso a paso, revisa [docs/publishing-to-npm.md](docs/publishing-to-npm.md).
 
 ## Tech Stack
 
@@ -131,6 +195,8 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
 
 | Comando | Descripcion |
 | --- | --- |
+| `bun run build` | Genera la CLI publicable en `dist/cli.js` |
+| `bun run pack:dry-run` | Muestra exactamente que archivos entrarian al paquete publicado |
 | `bun run start` | Ejecuta la CLI (ver subcomandos con `--help`) |
 | `bun run start:watch` | Ejecuta en modo watch (reinicia al guardar cambios) |
 | `bun run format:changed` | Formatea archivos modificados (vs HEAD) con Biome |
