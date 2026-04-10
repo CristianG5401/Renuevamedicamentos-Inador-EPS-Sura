@@ -19,6 +19,31 @@ Necesitaba un pequeño bot/script que me ayudara a renovar los medicamentos en l
 - Los datos del paciente: **numero de cedula**, **tipo de documento** y **fecha de nacimiento**
 - Un **Chat ID de destino** para recibir alertas del resultado de la renovacion
 
+## Instalacion
+
+### Instalar globalmente con Bun
+
+```bash
+bun add -g renuevamedicamentos-inador
+```
+
+### Ejecutar sin instalar globalmente
+
+```bash
+bunx renuevamedicamentos-inador --help
+```
+
+### Agregarla a otro proyecto
+
+```bash
+bun add renuevamedicamentos-inador
+bun install
+```
+
+`bun install` solo instala dependencias ya declaradas en el `package.json` del proyecto. Para agregar esta CLI por primera vez, usa `bun add`.
+
+> La instalacion puede ser pesada porque `whatsapp-web.js` depende de Puppeteer. El paquete publicado queda liviano, pero la primera instalacion descarga esas dependencias de runtime.
+
 ## Uso
 
 > Los ejemplos de esta seccion asumen que la CLI ya esta instalada. Si la ejecutas desde este repositorio durante desarrollo, reemplaza `renuevamedicamentos-inador` por `bun run start`.
@@ -111,9 +136,34 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
     bun run start --help
     bun run start init
     bun run start renew --help
+    bun run build
     ```
 
 3. Si prefieres usar variables de entorno para desarrollo local, crea `.env` a partir de `.env.example` y completa tus datos reales.
+
+## Publicar en npm
+
+1. Verifica el estado del proyecto:
+
+    ```bash
+    bun test
+    bun run build
+    bun run pack:dry-run
+    ```
+
+2. Publica la version actual en el registro publico:
+
+    ```bash
+    bun publish
+    ```
+
+3. Valida el paquete publicado:
+
+    ```bash
+    bunx renuevamedicamentos-inador --help
+    bun add -g renuevamedicamentos-inador
+    renuevamedicamentos-inador --help
+    ```
 
 ## Tech Stack
 
@@ -131,6 +181,8 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
 
 | Comando | Descripcion |
 | --- | --- |
+| `bun run build` | Genera la CLI publicable en `dist/cli.js` |
+| `bun run pack:dry-run` | Muestra exactamente que archivos entrarian al paquete publicado |
 | `bun run start` | Ejecuta la CLI (ver subcomandos con `--help`) |
 | `bun run start:watch` | Ejecuta en modo watch (reinicia al guardar cambios) |
 | `bun run format:changed` | Formatea archivos modificados (vs HEAD) con Biome |
