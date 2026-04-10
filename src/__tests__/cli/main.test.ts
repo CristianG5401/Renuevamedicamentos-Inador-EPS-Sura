@@ -7,4 +7,8 @@ describe("mainCommand", () => {
     expect(mainCommand.subCommands?.init).toBeDefined();
     expect(mainCommand.subCommands?.renew).toBeDefined();
   });
+
+  it("should expose the public CLI package name in command metadata", () => {
+    expect(mainCommand.meta?.name).toBe("renuevamedicamentos-inador");
+  });
 });
