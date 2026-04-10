@@ -143,7 +143,19 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
 
 ## Publicar en npm
 
-1. Verifica el estado del proyecto:
+1. Autentícate en npm:
+
+    ```bash
+    bunx npm login
+    ```
+
+2. Sube la versión antes de publicar:
+
+    ```bash
+    bun pm version patch
+    ```
+
+3. Ejecuta la verificación local:
 
     ```bash
     bun test
@@ -151,19 +163,21 @@ Si estas trabajando desde este repositorio, usa Bun para instalar dependencias y
     bun run pack:dry-run
     ```
 
-2. Publica la version actual en el registro publico:
+4. Publica el paquete:
 
     ```bash
     bun publish
     ```
 
-3. Valida el paquete publicado:
+5. Valida la publicación:
 
     ```bash
     bunx renuevamedicamentos-inador --help
     bun add -g renuevamedicamentos-inador
     renuevamedicamentos-inador --help
     ```
+
+Para troubleshooting, 2FA/tokens, guardrails de versionado y el flujo explicado paso a paso, revisa [docs/publishing-to-npm.md](docs/publishing-to-npm.md).
 
 ## Tech Stack
 
