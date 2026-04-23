@@ -37,14 +37,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .wwebjs_auth
 .wwebjs_cache
 
-# IA
-.claude
-/docs/plans
-.codex
-
 # opensrc - source code for packages
 opensrc/
 
-# Superpowers skill
-/docs/superpowers/
 .worktrees/
