@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv:*)",
+      "Bash(bunx tsc:*)",
+      "Bash(bun test:*)",
+      "Bash(ls:*)"
+    ]
+  },
+  "outputStyle": "Explanatory"
+}
