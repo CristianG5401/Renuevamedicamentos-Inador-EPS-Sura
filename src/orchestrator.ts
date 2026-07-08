@@ -2,6 +2,7 @@ import qrcode from "qrcode-terminal";
 import { consola } from "consola";
 import { createActor } from "xstate";
 
+import { resolveEpsChatIdsToListen } from "./application/config/epsChatIds";
 // Tipos
 import type { ValidatedConfig } from "./application/config/types";
 import type { WhatsAppPort } from "./ports/whatsappPort";
@@ -16,6 +17,25 @@ import { maskPhone } from "./utils/masking";
 
 //TODO: Usar path alias para las importaciones
 
+export function isMessageFromEpsAllowlist(
+  from: string,
+  epsChatIdsToListen: readonly string[],
+): boolean {
+  return epsChatIdsToListen.includes(from);
+}
+
+export function formatEpsChatLogLines(config: ValidatedConfig): string {
+  const epsChatIdsToListen = resolveEpsChatIdsToListen(
+    config.epsChatId,
+    config.epsChatIdsToListen,
+  );
+
+  return (
+    `Chat EPS destino: ${maskPhone(config.epsChatId)}\n` +
+    `Chats EPS escuchados: ${epsChatIdsToListen.map(maskPhone).join(", ")}`
+  );
+}
+
 /**
  * Crea el observer que maneja el ciclo de vida del actor XState.
  * Extraído como función para permitir testing unitario de los callbacks.
@@ -29,7 +49,7 @@ export function createActorObserver(
   return {
     next(snapshot: { value: unknown }) {
       consola.box(
-        `Estado: [${snapshot.value}]\nChat EPS: ${maskPhone(config.epsChatId)}`,
+        `Estado: [${snapshot.value}]\n${formatEpsChatLogLines(config)}`,
       );
     },
     async complete() {
@@ -75,6 +95,11 @@ export function startRenewal(
   config: ValidatedConfig,
   whatsapp: WhatsAppPort,
 ): Promise<void> {
+  const epsChatIdsToListen = resolveEpsChatIdsToListen(
+    config.epsChatId,
+    config.epsChatIdsToListen,
+  );
+
   const renewMedsMachineWithDeps = renewMedsMachine.provide(
     createActorServices(whatsapp, config.epsChatId),
   );
@@ -111,7 +136,7 @@ export function startRenewal(
     });
 
     whatsapp.onMessage((msg) => {
-      if (msg.from !== config.epsChatId) return;
+      if (!isMessageFromEpsAllowlist(msg.from, epsChatIdsToListen)) return;
 
       actor.send({
         type: EVENTS.MESSAGE_RECEIVED,
