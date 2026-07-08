@@ -6,6 +6,7 @@
 export interface ValidatedConfig {
   birthdate: string;
   epsChatId: string;
+  epsChatIdsToListen: string;
   idNumber: string;
   idType: string;
   nothingToRenewAlertMessage: string;
