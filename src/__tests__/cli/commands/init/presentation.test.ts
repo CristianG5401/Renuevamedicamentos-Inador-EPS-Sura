@@ -19,6 +19,7 @@ const FULL_CONFIG: ValidatedConfig = {
   idNumber: "1234567890",
   birthdate: "01/01/1990",
   epsChatId: "573001234567@c.us",
+  epsChatIdsToListen: "573001234567@c.us|147626817245299@lid",
   userToAlertChatId: "573007654321@c.us",
   successAlertMessage: "Renovación exitosa",
   nothingToRenewAlertMessage: "No hay nada por renovar",

@@ -23,6 +23,7 @@ export async function resolveConfig(
 	overrides?: CliOverrides,
 ): Promise<ValidatedConfig> {
 	const globalConfig: Partial<ValidatedConfig> = (await loadGlobalConfig()) ?? {};
+	const epsChatId = process.env.EPS_CHAT_ID ?? globalConfig.epsChatId;
 
 	const resolved = {
 		birthdate:
@@ -52,7 +53,11 @@ export async function resolveConfig(
 			process.env.USER_TO_ALERT_CHAT_ID ??
 			globalConfig.userToAlertChatId,
 		// epsChatId: SIN override de CLI — solo env o config global
-		epsChatId: process.env.EPS_CHAT_ID ?? globalConfig.epsChatId,
+		epsChatId,
+		epsChatIdsToListen:
+			process.env.EPS_CHAT_IDS_TO_LISTEN ??
+			globalConfig.epsChatIdsToListen ??
+			epsChatId,
 	};
 
 	const missingVars = Object.entries(resolved)

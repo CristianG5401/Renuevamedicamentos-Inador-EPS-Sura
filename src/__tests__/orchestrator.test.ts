@@ -8,6 +8,7 @@ const VALID_CONFIG: ValidatedConfig = {
   idNumber: "123456789",
   birthdate: "01/01/1990",
   epsChatId: "57000@c.us",
+  epsChatIdsToListen: "57000@c.us|147626817245299@lid",
   userToAlertChatId: "57001@c.us",
   successAlertMessage: "ok",
   nothingToRenewAlertMessage: "nada",

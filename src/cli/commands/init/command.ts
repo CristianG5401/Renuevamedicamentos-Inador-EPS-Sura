@@ -101,6 +101,7 @@ export const initCommand = defineCommand({
       idNumber,
       birthdate,
       epsChatId,
+      epsChatIdsToListen: epsChatId,
       userToAlertChatId,
       successAlertMessage,
       nothingToRenewAlertMessage,
