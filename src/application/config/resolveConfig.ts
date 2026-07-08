@@ -10,7 +10,9 @@ import { loadGlobalConfig } from "../../infrastructure/config/global-store";
 import type { ValidatedConfig } from "./types";
 
 /** Valores sobreescribibles desde argumentos CLI (datos del usuario). */
-export type CliOverrides = Partial<Omit<ValidatedConfig, "epsChatId">>;
+export type CliOverrides = Partial<
+	Omit<ValidatedConfig, "epsChatId" | "epsChatIdsToListen">
+>;
 
 /**
  * Resuelve la configuración final mezclando argumentos CLI, variables de entorno y config.json global.

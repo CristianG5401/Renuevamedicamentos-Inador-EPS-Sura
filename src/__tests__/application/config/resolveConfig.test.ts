@@ -1,4 +1,11 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
+import type { CliOverrides } from "../../../application/config/resolveConfig";
+
+const cliOverridesCannotSetListenIds: CliOverrides = {
+  // @ts-expect-error listen IDs are resolved from env/global config only.
+  epsChatIdsToListen: "573175180237@c.us",
+};
+void cliOverridesCannotSetListenIds;
 
 const BASE_GLOBAL_CONFIG = {
   birthdate: "01/01/1990",
