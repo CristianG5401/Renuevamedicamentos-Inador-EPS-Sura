@@ -8,11 +8,16 @@
  */
 
 import consola from "consola";
+import { parsePipeSeparatedChatIds } from "../../../application/config/epsChatIds";
 import type { ValidatedConfig } from "../../../application/config/types";
 import { maskIdNumber, maskPhone } from "../../../utils/masking";
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
+}
+
+function maskPipeSeparatedChatIds(value: string): string {
+  return parsePipeSeparatedChatIds(value).map(maskPhone).join(" | ");
 }
 
 /**
@@ -33,6 +38,10 @@ export function showExistingConfig(config: Partial<ValidatedConfig>): void {
     consola.info(`Fecha de nacimiento: ${config.birthdate}`);
   if (isNonEmptyString(config.epsChatId))
     consola.info(`Chat ID de la EPS: ${maskPhone(config.epsChatId)}`);
+  if (isNonEmptyString(config.epsChatIdsToListen))
+    consola.info(
+      `Chat IDs de la EPS escuchados: ${maskPipeSeparatedChatIds(config.epsChatIdsToListen)}`,
+    );
   if (isNonEmptyString(config.userToAlertChatId))
     consola.info(
       `Chat ID para alertas de resultado: ${maskPhone(config.userToAlertChatId)}`,
@@ -58,6 +67,8 @@ const FIELD_HINTS: Partial<Record<keyof ValidatedConfig, string>> = {
   birthdate: "Formato esperado: DD/MM/AAAA",
   epsChatId:
     "Es el identificador del chat de tu EPS en WhatsApp. Para encontrarlo, abre WhatsApp Web, entra al chat de la EPS y mira el final de la URL (ej: 573001234567@c.us).",
+  epsChatIdsToListen:
+    "IDs de WhatsApp a escuchar desde los que el bot aceptará respuestas de la EPS. Puedes separar varios con |, por ejemplo: 573001234567@c.us|147626817245299@lid. El bot seguirá enviando mensajes al Chat ID principal de la EPS.",
   userToAlertChatId:
     "Es el chat en WhatsApp donde recibirás las alertas de éxito o 'nada por renovar'. Se obtiene igual que el Chat ID de la EPS, desde WhatsApp Web.",
   successAlertMessage:
