@@ -67,11 +67,30 @@ describe("resolveConfig epsChatIdsToListen", () => {
       epsChatIdsToListen: "147626817245299@lid",
     });
 
-    expect(config.epsChatIdsToListen).toBe("147626817245299@lid");
+    expect(config.epsChatIdsToListen).toBe(
+      "147626817245299@lid|573175180237@c.us",
+    );
   });
 
   it("should fall back to epsChatId when listen config is absent", async () => {
     const config = await resolveWithGlobalConfig(BASE_GLOBAL_CONFIG);
+
+    expect(config.epsChatIdsToListen).toBe("573175180237@c.us");
+  });
+
+  it("should fall back to epsChatId when env listen config is blank", async () => {
+    process.env.EPS_CHAT_IDS_TO_LISTEN = "";
+
+    const config = await resolveWithGlobalConfig(BASE_GLOBAL_CONFIG);
+
+    expect(config.epsChatIdsToListen).toBe("573175180237@c.us");
+  });
+
+  it("should fall back to epsChatId when global listen config is blank", async () => {
+    const config = await resolveWithGlobalConfig({
+      ...BASE_GLOBAL_CONFIG,
+      epsChatIdsToListen: "",
+    });
 
     expect(config.epsChatIdsToListen).toBe("573175180237@c.us");
   });

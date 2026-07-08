@@ -7,6 +7,7 @@
  */
 
 import { loadGlobalConfig } from "../../infrastructure/config/global-store";
+import { resolveEpsChatIdsToListen } from "./epsChatIds";
 import type { ValidatedConfig } from "./types";
 
 /** Valores sobreescribibles desde argumentos CLI (datos del usuario). */
@@ -26,6 +27,8 @@ export async function resolveConfig(
 ): Promise<ValidatedConfig> {
 	const globalConfig: Partial<ValidatedConfig> = (await loadGlobalConfig()) ?? {};
 	const epsChatId = process.env.EPS_CHAT_ID ?? globalConfig.epsChatId;
+	const rawEpsChatIdsToListen =
+		process.env.EPS_CHAT_IDS_TO_LISTEN ?? globalConfig.epsChatIdsToListen;
 
 	const resolved = {
 		birthdate:
@@ -56,10 +59,9 @@ export async function resolveConfig(
 			globalConfig.userToAlertChatId,
 		// epsChatId: SIN override de CLI — solo env o config global
 		epsChatId,
-		epsChatIdsToListen:
-			process.env.EPS_CHAT_IDS_TO_LISTEN ??
-			globalConfig.epsChatIdsToListen ??
-			epsChatId,
+		epsChatIdsToListen: epsChatId
+			? resolveEpsChatIdsToListen(epsChatId, rawEpsChatIdsToListen).join("|")
+			: rawEpsChatIdsToListen,
 	};
 
 	const missingVars = Object.entries(resolved)
