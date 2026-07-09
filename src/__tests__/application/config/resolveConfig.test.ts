@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import type { CliOverrides } from "../../../application/config/resolveConfig";
 
 const cliOverridesCannotSetListenIds: CliOverrides = {
@@ -30,11 +30,19 @@ const ENV_KEYS = [
   "USER_TO_ALERT_CHAT_ID",
 ] as const;
 
+function clearConfigEnv() {
+	for (const key of ENV_KEYS) {
+		delete process.env[key];
+	}
+}
+
+beforeEach(() => {
+	clearConfigEnv();
+});
+
 afterEach(() => {
-  for (const key of ENV_KEYS) {
-    delete process.env[key];
-  }
-  mock.restore();
+	clearConfigEnv();
+	mock.restore();
 });
 
 async function resolveWithGlobalConfig(globalConfig: Record<string, string>) {
