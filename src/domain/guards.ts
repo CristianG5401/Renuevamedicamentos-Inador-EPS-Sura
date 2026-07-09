@@ -109,21 +109,21 @@ export const guards = {
     consola.debug("**🪼 checkProcsAndMedsMenu **", {
       msg,
     });
-    if (!msg.dynamicReplyButtons?.displayTexts) return false;
+    if (msg.type !== "list") return false;
 
-    const isProcsAndMedsMenuDescriptionOK =
-      msg.normalizedText?.includes("elige la opción:");
+    const isProcsAndMedsListDescriptionOK = msg?.list?.description.includes(
+      "Elige la opción:",
+    );
 
-    const areMenuOptionAvailable =
-      msg.dynamicReplyButtons?.displayTexts.length > 0;
+    const listOptionsAreAvailable = msg?.list?.options?.length > 0;
     const matchingProcsAndMedsOption =
-      msg.dynamicReplyButtons?.displayTexts?.find((option) => {
-        return option === "Trámites";
+      msg?.list?.options?.find((option) => {
+        return option.title === "Tramites";
       });
 
     return (
-      isProcsAndMedsMenuDescriptionOK &&
-      areMenuOptionAvailable &&
+      isProcsAndMedsListDescriptionOK &&
+      listOptionsAreAvailable &&
       !!matchingProcsAndMedsOption
     );
   },
