@@ -324,7 +324,7 @@ export const renewMedsMachine = setup({
         id: "sendSelectedProcsAndMedsOption",
         src: "sendMessageService",
         input: {
-          message: "Trámites",
+          message: "Tramites",
         },
         onDone: {
           target: STATES.WAITING.FOR_PROCEDURES_MESSAGE,
