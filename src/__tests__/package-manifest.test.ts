@@ -1,10 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import packageJson from "../../package.json";
 
+const publicPackageJson = packageJson as typeof packageJson & { private?: unknown };
+
 describe("package manifest", () => {
   it("should be configured as a public Bun-first CLI package", () => {
     expect(packageJson.name).toBe("renuevamedicamentos-inador");
-    expect(packageJson.private).toBeUndefined();
+    expect(publicPackageJson.private).toBeUndefined();
     expect(packageJson.bin).toEqual({
       "renuevamedicamentos-inador": "./dist/cli.js",
     });

@@ -19,6 +19,7 @@ const FULL_CONFIG: ValidatedConfig = {
   idNumber: "1234567890",
   birthdate: "01/01/1990",
   epsChatId: "573001234567@c.us",
+  epsChatIdsToListen: "573001234567@c.us|147626817245299@lid",
   userToAlertChatId: "573007654321@c.us",
   successAlertMessage: "Renovación exitosa",
   nothingToRenewAlertMessage: "No hay nada por renovar",
@@ -57,6 +58,20 @@ describe("showExistingConfig", () => {
     const allCalls = infoSpy.mock.calls.flat().join(" ");
     expect(allCalls).not.toContain("573001234567@c.us");
     expect(allCalls).toContain("5730***4567@c.us");
+  });
+
+  it("should mask every epsChatIdsToListen entry", () => {
+    const infoSpy = spyOn(consola, "info").mockImplementation(
+      (() => {}) as never,
+    );
+
+    showExistingConfig(FULL_CONFIG);
+
+    const allCalls = infoSpy.mock.calls.flat().join(" ");
+    expect(allCalls).not.toContain("573001234567@c.us");
+    expect(allCalls).not.toContain("147626817245299@lid");
+    expect(allCalls).toContain("5730***4567@c.us");
+    expect(allCalls).toContain("1476***5299@lid");
   });
 
   it("should mask userToAlertChatId with maskPhone", () => {
@@ -169,6 +184,18 @@ describe("showFieldHint", () => {
     // Assert
     const output = infoSpy.mock.calls.flat().join(" ");
     expect(output).toContain("DD/MM/AAAA");
+  });
+
+  it("should print a hint for epsChatIdsToListen that mentions pipe-separated IDs", () => {
+    const infoSpy = spyOn(consola, "info").mockImplementation(
+      (() => {}) as never,
+    );
+
+    showFieldHint("epsChatIdsToListen");
+
+    const output = infoSpy.mock.calls.flat().join(" ");
+    expect(output).toContain("|");
+    expect(output.toLowerCase()).toContain("escuchar");
   });
 
   it("should do nothing for fields without a registered hint", () => {

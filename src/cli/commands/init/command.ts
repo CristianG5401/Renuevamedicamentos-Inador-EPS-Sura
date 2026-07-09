@@ -70,6 +70,13 @@ export const initCommand = defineCommand({
     );
     if (!epsChatId) return;
 
+    showFieldHint("epsChatIdsToListen");
+    const epsChatIdsToListen = await promptText(
+      "Chat IDs de la EPS a escuchar:",
+      `${epsChatId}|XXXXXXXXXXXX@lid`,
+    );
+    if (!epsChatIdsToListen) return;
+
     showFieldHint("userToAlertChatId");
     const userToAlertChatId = await promptText(
       "Chat ID donde enviar alertas de resultado:",
@@ -101,6 +108,7 @@ export const initCommand = defineCommand({
       idNumber,
       birthdate,
       epsChatId,
+      epsChatIdsToListen,
       userToAlertChatId,
       successAlertMessage,
       nothingToRenewAlertMessage,
