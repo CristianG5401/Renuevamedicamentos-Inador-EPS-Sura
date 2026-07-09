@@ -34,7 +34,10 @@ export class WhatsAppWebJsAdapter implements WhatsAppPort {
   constructor() {
     this.client = new Client({
       authStrategy: new LocalAuth(),
-      puppeteer: { headless: true },
+      puppeteer: {
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      },
     });
   }
 
